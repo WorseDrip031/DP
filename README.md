@@ -1,1 +1,1 @@
-# DP - Deep Leraning Methods for Histological Image Analysis
+# DP - Histpathological Image Analysis
