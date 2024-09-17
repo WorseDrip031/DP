@@ -1,1 +1,1 @@
-# DP - Histpathological Image Analysis
+# DP - Histopathological Image Analysis
