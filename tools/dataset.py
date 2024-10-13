@@ -286,6 +286,20 @@ def pre_process_subset(original_folder, target_folder):
                     print(f"{file.stem} - Creating patches: {patch_num} / {total_patches}   ->   {(patch_num/total_patches*100):.2f}%")
 
                 patch_num += 1
+        
+        # Closing images to prevent memory leak
+        if img is not None:
+            img.close()
+        if g3_img is not None:
+            g3_img.close()
+        if g4_img is not None:
+            g4_img.close()
+        if g5_img is not None:
+            g5_img.close()
+        if normal_img is not None:
+            normal_img.close()
+        if stroma_img is not None:
+            stroma_img.close()
 
 
 def pre_process_dataset(dataset_folder):
