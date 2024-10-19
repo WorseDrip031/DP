@@ -116,18 +116,26 @@ def create_animals_dataset(is_train=True, **kwargs):
 
 
 class AGGC2022Dataset(Dataset):
-    def __init__(self, subset_path: Path):
-        self.subset_path = subset_path
-        self.files = sorted(list(subset_path.rglob("*.png")))
+    def __init__(self, dataset_path: Path):
+        self.dataset_path = dataset_path
+        self.files = sorted(list(dataset_path.rglob("*.png")))
 
         # Remove every file which starts with "00000" as they are only for visualization
         self.files = [file for file in self.files if not file.name.startswith("00000")]
 
-        # Divide the files into 2 categories:
+        # Divide the files into 6 categories:
         # 1. Files which end with "image.png" for images
-        # 2. Files which end with "mask.png" for masks
+        # 2. Files which end with "g3.png" for masks
+        # 3. Files which end with "g4.png" for masks
+        # 4. Files which end with "g5.png" for masks
+        # 5. Files which end with "normal.png" for masks
+        # 6. Files which end with "stroma.png" for masks
         self.images = sorted([file for file in self.files if file.name.endswith("image.png")])
-        self.masks = sorted([file for file in self.files if file.name.endswith("mask.png")])
+        self.g3 = sorted([file for file in self.files if file.name.endswith("g3.png")])
+        self.g4 = sorted([file for file in self.files if file.name.endswith("g4.png")])
+        self.g5 = sorted([file for file in self.files if file.name.endswith("g5.png")])
+        self.normal = sorted([file for file in self.files if file.name.endswith("normal.png")])
+        self.stroma = sorted([file for file in self.files if file.name.endswith("stroma.png")])
 
 
     def __len__(self):
@@ -136,14 +144,22 @@ class AGGC2022Dataset(Dataset):
 
     def __getitem__(self, index):
         image_path = self.images[index]
-        mask_path = self.masks[index]
+        g3_path = self.g3[index]
+        g4_path = self.g4[index]
+        g5_path = self.g5[index]
+        normal_path = self.normal[index]
+        stroma_path = self.stroma[index]
+
         image = np.array(Image.open(image_path).convert("RGB"))
-        mask = np.array(Image.open(mask_path), dtype=np.uint8)
-        return image, mask
+        g3_mask = np.array(Image.open(g3_path).convert("L"))
+        g4_mask = np.array(Image.open(g4_path).convert("L"))
+        g5_mask = np.array(Image.open(g5_path).convert("L"))
+        normal_mask = np.array(Image.open(normal_path).convert("L"))
+        stroma_mask = np.array(Image.open(stroma_path).convert("L"))
 
+        mask = np.stack([stroma_mask, normal_mask, g3_mask, g4_mask, g5_mask], axis=-1)
 
-def combine_masks(g3_patch, g4_patch, g5_patch, normal_patch, stroma_patch, patch_size):
-    pass
+        return image, mask 
 
 
 def contains_mask(image, mask_percent):
@@ -328,7 +344,7 @@ def create_aggc_dataset(type="train", **kwargs):
     dataset_folder = DATASET_BASEPATH / "AGGC-2022"
     check_file = dataset_folder / ".done"
     if not check_file.exists():
-        pre_process_dataset(dataset_folder)
+        #pre_process_dataset(dataset_folder)
         check_file.touch()
 
     # Create dataset from folder
@@ -341,5 +357,4 @@ def create_aggc_dataset(type="train", **kwargs):
     else:
         return None
     
-    return None
-    # return AGGC2022Dataset(images_folder)
+    return AGGC2022Dataset(images_folder)
