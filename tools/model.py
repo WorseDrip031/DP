@@ -1,6 +1,7 @@
 import timm
 import torch.nn as nn
 import torchvision.transforms as TVF
+import torchvision.models as models
 
 class MultilayerPerceptron(nn.Module):
     def __init__(self, nin, nhidden, nout):
@@ -88,3 +89,27 @@ class PretrainedConvModel(nn.Module):
         f = self.feature_extractor(x)
         logits = self.head(f)
         return logits
+    
+
+class ResNet18Model(nn.Module):
+    def __init__(self, num_classes, use_pretrained):
+        super(ResNet18Model, self).__init__()
+        self.num_classes = num_classes
+
+        self.model = models.resnet18(pretrained=use_pretrained)
+        self.model.fc = nn.Linear(512, num_classes)
+
+    def forward(self, x):
+        return self.model(x)
+    
+
+class ResNet50Model(nn.Module):
+    def __init__(self, num_classes, use_pretrained):
+        super(ResNet50Model, self).__init__()
+        self.num_classes = num_classes
+
+        self.model = models.resnet50(pretrained=use_pretrained)
+        self.model.fc = nn.Linear(2048, num_classes)
+
+    def forward(self, x):
+        return self.model(x)

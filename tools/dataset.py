@@ -692,4 +692,4 @@ def create_aggc_classification_dataset(type="train", **kwargs):
     else:
         return None
     
-    return AGGC2022ClassificationDataset(images_folder)
+    return AGGC2022ClassificationDataset(images_folder, **kwargs)
