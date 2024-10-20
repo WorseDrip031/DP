@@ -10,17 +10,13 @@ import torch.nn.functional as tnf
 from PIL import Image
 import math
 from tqdm import tqdm
+import random
 
 
 DATASET_BASEPATH=Path(".scratch/data")
 ANIMALS_DOWNLOAD_URL="https://vggnas.fiit.stuba.sk/download/datasets/animals/animals.zip"
 
 
-class NumpyToTensor(Callable):
-    def __call__(self, x):
-        x = np.transpose(x, axes=(2,0,1))   # HWC -> CHW
-        x = torch.from_numpy(x) / 255.0     # <0;255>UINT8 -> <0;1>
-        return x.float()                    # cast as 32-bit float
 
 
 class ClassToOneHot(Callable):
@@ -116,6 +112,76 @@ def create_animals_dataset(is_train=True, **kwargs):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#************************#
+#    Helper Functions    #
+#************************#
+
+
+random.seed(42)
+
+
+
+
+
+class NumpyToTensor(Callable):
+    def __call__(self, x):
+        x = np.transpose(x, axes=(2,0,1))   # HWC -> CHW
+        x = torch.from_numpy(x) / 255.0     # <0;255>UINT8 -> <0;1>
+        return x.float()                    # cast as 32-bit float
+    
+
+
+
+
 def is_mask_fully_white(image_path):
     with Image.open(image_path) as img:
         img = img.convert('L')
@@ -125,70 +191,24 @@ def is_mask_fully_white(image_path):
 
 
 
+def contains_mask(image, mask_percent):
+    if image is None:
+        return False
+    pixels = list(image.getdata())
+    total_pixels = len(pixels)
+    count_255 = pixels.count(255)
+    return count_255 >= (mask_percent * total_pixels)
 
-class AGGC2022ClassificationDataset(Dataset):
-    def __init__(self, dataset_path: Path):
-        self.dataset_path = dataset_path
-        self.files = sorted(list(dataset_path.rglob("*.png")))
-        self.num_classes = 5
 
-        # Remove every file which starts with "00000" as they are only for visualization
-        self.files = [file for file in self.files if not file.name.startswith("00000")]
 
-        # Divide the files into 6 categories:
-        # 1. Files which end with "image.png" for images
-        # 2. Files which end with "g3.png" for masks
-        # 3. Files which end with "g4.png" for masks
-        # 4. Files which end with "g5.png" for masks
-        # 5. Files which end with "normal.png" for masks
-        # 6. Files which end with "stroma.png" for masks
-        self.images = sorted([file for file in self.files if file.name.endswith("image.png")])
-        self.g3 = sorted([file for file in self.files if file.name.endswith("g3.png")])
-        self.g4 = sorted([file for file in self.files if file.name.endswith("g4.png")])
-        self.g5 = sorted([file for file in self.files if file.name.endswith("g5.png")])
-        self.normal = sorted([file for file in self.files if file.name.endswith("normal.png")])
-        self.stroma = sorted([file for file in self.files if file.name.endswith("stroma.png")])
 
-        self.data = []
-        self.labels = []
 
-        for i, _ in enumerate(tqdm(self.images)):
-            if is_mask_fully_white(self.normal[i]):
-                self.data.append(self.images[i])
-                label = torch.zeros(self.num_classes)
-                label[0] = 1.0
-                self.labels.append(label)
-            elif is_mask_fully_white(self.stroma[i]):
-                self.data.append(self.images[i])
-                label = torch.zeros(self.num_classes)
-                label[1] = 1.0
-                self.labels.append(label)
-            elif is_mask_fully_white(self.g3[i]):
-                self.data.append(self.images[i])
-                label = torch.zeros(self.num_classes)
-                label[2] = 1.0
-                self.labels.append(label)
-            elif is_mask_fully_white(self.g4[i]):
-                self.data.append(self.images[i])
-                label = torch.zeros(self.num_classes)
-                label[3] = 1.0
-                self.labels.append(label)
-            elif is_mask_fully_white(self.g5[i]):
-                self.data.append(self.images[i])
-                label = torch.zeros(self.num_classes)
-                label[4] = 1.0
-                self.labels.append(label)
-            
-
-    def __len__(self):
-        return len(self.data)
- 
-
-    def __getitem__(self, index):
-        image_path = self.images[index]
-        image = np.array(Image.open(image_path).convert("RGB"))
-        label = self.labels[index]
-        return image, label 
+def save_annotation(patch, patch_size, sub_folder, name, patch_num):
+    if patch is None:
+        # Create an empty annotation 
+        patch = Image.new('L', (patch_size, patch_size), 0)
+    patch_file = sub_folder / f"{patch_num:05d}_{name}.png"
+    patch.save(patch_file)
 
 
 
@@ -197,6 +217,30 @@ class AGGC2022ClassificationDataset(Dataset):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#********************************#
+#   AGGC Segmentation Dataset    #
+#********************************#
 
 
 class AGGC2022Dataset(Dataset):
@@ -246,21 +290,7 @@ class AGGC2022Dataset(Dataset):
         return image, mask 
 
 
-def contains_mask(image, mask_percent):
-    if image is None:
-        return False
-    pixels = list(image.getdata())
-    total_pixels = len(pixels)
-    count_255 = pixels.count(255)
-    return count_255 >= (mask_percent * total_pixels)
 
-
-def save_annotation(patch, patch_size, sub_folder, name, patch_num):
-    if patch is None:
-        # Create an empty annotation 
-        patch = Image.new('L', (patch_size, patch_size), 0)
-    patch_file = sub_folder / f"{patch_num:05d}_{name}.png"
-    patch.save(patch_file)
 
 
 def pre_process_subset(original_folder, target_folder):
@@ -402,6 +432,152 @@ def pre_process_subset(original_folder, target_folder):
             stroma_img.close()
 
 
+
+
+
+def pre_process_dataset(dataset_folder):
+    dataset_folder.mkdir(parents=True, exist_ok=True)
+    original_folder = DATASET_BASEPATH / "AGGC-2022-Unprepared"
+
+    check_file = dataset_folder / "train" / ".done"
+    if not check_file.exists():
+        pre_process_subset(original_folder / "train", dataset_folder / "train")
+        check_file.touch()
+
+    check_file = dataset_folder / "val" / ".done"
+    if not check_file.exists():
+        pre_process_subset(original_folder / "val", dataset_folder / "val")
+        check_file.touch()
+
+    check_file = dataset_folder / "test" / ".done"
+    if not check_file.exists():
+        pre_process_subset(original_folder / "test", dataset_folder / "test")
+        check_file.touch()
+
+
+
+
+
+def create_aggc_dataset(type="train", **kwargs):
+
+    # Pre-process dataset if neccessary
+    dataset_folder = DATASET_BASEPATH / "AGGC-2022"
+    check_file = dataset_folder / ".done"
+    if not check_file.exists():
+        pre_process_dataset(dataset_folder)
+        check_file.touch()
+
+    # Create dataset from folder
+    if type == "train":
+        images_folder = dataset_folder / "train"
+    elif type == "val":
+        images_folder = dataset_folder / "val"
+    elif type == "test":
+        images_folder = dataset_folder / "test"
+    else:
+        return None
+    
+    return AGGC2022Dataset(images_folder)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#********************************#
+#  AGGC Classification Dataset   #
+#********************************#
+
+
+class AGGC2022ClassificationDataset(Dataset):
+    def __init__(self, dataset_path: Path, image_transform, augmentation_transform):
+        self.dataset_path = dataset_path
+        self.image_transform = image_transform
+        self.augmentation_transform = augmentation_transform
+        self.num_classes = 5
+
+        # Find the smallest group and sample randomly from each group accordingly
+        self.normal_path = dataset_path / "normal"
+        self.normal_patches = sorted(list(self.normal_path.rglob("*png")))
+
+        self.stroma_path = dataset_path / "stroma"
+        self.stroma_patches = sorted(list(self.stroma_path.rglob("*png")))
+
+        self.g3_path = dataset_path / "g3"
+        self.g3_patches = sorted(list(self.g3_path.rglob("*png")))
+
+        self.g4_path = dataset_path / "g4"
+        self.g4_patches = sorted(list(self.g4_path.rglob("*png")))
+
+        self.g5_path = dataset_path / "g5"
+        self.g5_patches = sorted(list(self.g5_path.rglob("*png")))
+
+        self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g3_patches, self.g4_patches, self.g5_patches]
+        self.list_min_length = min(len(lst) for lst in self.patch_litsts)
+
+        self.files = []
+        for lst in self.patch_litsts:
+            self.files.extend(random.sample(lst, self.list_min_length))
+            
+
+    def __len__(self):
+        return len(self.files)
+ 
+
+    def __getitem__(self, index):
+        image_path = self.files[index]
+
+        image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        label = torch.zeros(self.num_classes)
+        if image_path.parent.name == "normal":
+            label[0] = 1.0
+        elif image_path.parent.name == "stroma":
+            label[1] = 1.0
+        elif image_path.parent.name == "g3":
+            label[2] = 1.0
+        elif image_path.parent.name == "g4":
+            label[3] = 1.0
+        elif image_path.parent.name == "g5":
+            label[4] = 1.0
+
+        if self.image_transform is not None:
+            image = self.image_transform(image)
+
+        if self.augmentation_transform is not None:
+            image = self.augmentation_transform(image)
+
+        return image, label 
+
+
+
+
+
 def pre_process_classification_subset(original_folder, target_folder):
     target_folder.mkdir(parents=True, exist_ok=True)
     normal_folder = target_folder / "normal"
@@ -463,24 +639,6 @@ def pre_process_classification_subset(original_folder, target_folder):
 
 
 
-def pre_process_dataset(dataset_folder):
-    dataset_folder.mkdir(parents=True, exist_ok=True)
-    original_folder = DATASET_BASEPATH / "AGGC-2022-Unprepared"
-
-    check_file = dataset_folder / "train" / ".done"
-    if not check_file.exists():
-        pre_process_subset(original_folder / "train", dataset_folder / "train")
-        check_file.touch()
-
-    check_file = dataset_folder / "val" / ".done"
-    if not check_file.exists():
-        pre_process_subset(original_folder / "val", dataset_folder / "val")
-        check_file.touch()
-
-    check_file = dataset_folder / "test" / ".done"
-    if not check_file.exists():
-        pre_process_subset(original_folder / "test", dataset_folder / "test")
-        check_file.touch()
 
 
 def pre_process_classification_dataset(dataset_folder):
@@ -503,26 +661,9 @@ def pre_process_classification_dataset(dataset_folder):
         check_file.touch()
 
 
-def create_aggc_dataset(type="train", **kwargs):
 
-    # Pre-process dataset if neccessary
-    dataset_folder = DATASET_BASEPATH / "AGGC-2022"
-    check_file = dataset_folder / ".done"
-    if not check_file.exists():
-        pre_process_dataset(dataset_folder)
-        check_file.touch()
 
-    # Create dataset from folder
-    if type == "train":
-        images_folder = dataset_folder / "train"
-    elif type == "val":
-        images_folder = dataset_folder / "val"
-    elif type == "test":
-        images_folder = dataset_folder / "test"
-    else:
-        return None
-    
-    return AGGC2022Dataset(images_folder)
+
 
 
 def create_aggc_classification_dataset(type="train", **kwargs):
@@ -551,5 +692,4 @@ def create_aggc_classification_dataset(type="train", **kwargs):
     else:
         return None
     
-    return None
-    #return AGGC2022ClassificationDataset(images_folder)
+    return AGGC2022ClassificationDataset(images_folder)
