@@ -22,7 +22,7 @@ class Trainer:
     def setup(self, datamodule, logs=[]):
         self.log = LogCompose(list_log=logs)
         self.datamodule = datamodule
-        self.datamodule.setup(self.cfg)
+        #self.datamodule.setup(self.cfg)
         
     def fit(self):
         self.log.on_training_start()

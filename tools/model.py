@@ -113,3 +113,15 @@ class ResNet50Model(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+    
+
+class ViTModel(nn.Module):
+    def __init__(self, num_classes, use_pretrained=True):
+        super(ViTModel, self).__init__()
+        self.num_classes = num_classes
+
+        self.model = models.vit_b_32(pretrained=use_pretrained)  # You can choose different variants if needed
+        self.model.heads = nn.Linear(self.model.heads.in_features, num_classes)
+
+    def forward(self, x):
+        return self.model(x)

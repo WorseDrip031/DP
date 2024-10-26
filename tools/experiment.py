@@ -149,7 +149,7 @@ class AGGCClassificationExperiment:
         self.experiment_path = BASE_PATH / cfg.name
         
         # Create datamodule & model
-        self.datamodule = AGGC2022ClassificationDatamodule()
+        self.datamodule = AGGC2022ClassificationDatamodule(cfg)
         self.model = self.create_model(cfg)
 
         if load_checkpoint_filepath is not None:

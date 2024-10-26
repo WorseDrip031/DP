@@ -66,7 +66,7 @@ class AGGC2022ClassificationDatamodule:
             image_transform=self.input_transform,
             augmentation_transform=None
         )
-        self.dataset_val = create_aggc_classification_dataset(
+        self.dataset_test = create_aggc_classification_dataset(
             type="test",
             image_transform=self.input_transform,
             augmentation_transform=None
