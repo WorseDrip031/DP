@@ -120,8 +120,34 @@ class ViTModel(nn.Module):
         super(ViTModel, self).__init__()
         self.num_classes = num_classes
 
-        self.model = models.vit_b_32(pretrained=use_pretrained)  # You can choose different variants if needed
+        self.model = models.vit_b_32(pretrained=use_pretrained)
         self.model.heads = nn.Linear(self.model.heads.in_features, num_classes)
 
     def forward(self, x):
         return self.model(x)
+
+
+class PretrainedVitModel(nn.Module):
+    def __init__(self, num_classes):
+        super(PretrainedVitModel, self).__init__()
+        self.num_classes = num_classes
+
+        self.feature_extractor = timm.create_model("ViT-B-16-SigLIP-512", pretrained=True)
+        self.feature_extractor.reset_classifier(0, "")
+
+        self.norm_transform = TVF.Normalize(
+            mean=self.feature_extractor.default_cfg["mean"],
+            std=self.feature_extractor.default_cfg["std"]
+        )
+
+        for p in self.feature_extractor.parameters():
+            p.requires_grad = False
+
+        self.head = nn.Linear(self.feature_extractor.num_features, num_classes)
+
+    def forward(self, x):
+        x = self.norm_transform(x)
+        f = self.feature_extractor(x)
+        f = f[:,0]
+        logits = self.head(f)
+        return logits

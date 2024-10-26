@@ -13,7 +13,7 @@ if __name__ == "__main__":
     p = ArgumentParser()
 
     # Experiment
-    p.add_argument("--name", "-n", type=str, default="Non-Pretrained ResNet18 First Try", help="Experiment name")
+    p.add_argument("--name", "-n", type=str, default="PretrainedViT First Try", help="Experiment name")
 
     # Hyperparameters
     p.add_argument("--batch_size", "-bs", type=int, default=64, help="Batch size")
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     p.add_argument("--use_pretrained_model", "-upm", choices=["Yes", "No"], default="No", help="Use pretrained model?")
 
     # Model
-    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50"], default="ResNet18", help="Model Architecture")
+    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "PretrainedViT"], default="PretrainedViT", help="Model Architecture")
 
     cfg = p.parse_args()
     main(cfg)

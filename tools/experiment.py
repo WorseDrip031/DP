@@ -5,7 +5,7 @@ from torchsummary import summary
 from argparse import Namespace
 
 from tools.datamodule import DataModule, AGGC2022ClassificationDatamodule
-from tools.model import SimpleConvModel, PretrainedConvModel, ResNet18Model, ResNet50Model
+from tools.model import SimpleConvModel, PretrainedConvModel, ResNet18Model, ResNet50Model, PretrainedVitModel
 from tools.trainer import Trainer
 import tools.logging as L
 
@@ -201,6 +201,8 @@ class AGGCClassificationExperiment:
             model = ResNet18Model(5, use_pretrained)
         elif cfg.model_architecture == "ResNet50":
             model = ResNet50Model(5, use_pretrained)
+        elif cfg.model_architecture == "PretrainedViT":
+            model = PretrainedVitModel(5)
         else:
             raise Exception(f"Invalid architecture: {cfg.model_architecture}")
         
