@@ -5,7 +5,7 @@ from torchsummary import summary
 from argparse import Namespace
 
 from tools.datamodule import DataModule, AGGC2022ClassificationDatamodule
-from tools.model import SimpleConvModel, PretrainedConvModel, ResNet18Model, ResNet50Model, PretrainedVitModel, ViTModel
+from tools.model import SimpleConvModel, PretrainedConvModel, ResNet18Model, ResNet50Model, ViTModel
 from tools.trainer import Trainer
 import tools.logging as L
 
@@ -215,12 +215,13 @@ class AGGCClassificationExperiment:
             raise Exception(f"Invalid architecture: {cfg.model_architecture}")
         
         print("Creating model: ")
-        summary(
-            model,
-            input_size=(num_classes,512,512),
-            batch_size=1,
-            device="cpu"
-        )
+        if cfg.model_architecture != "ViT":
+            summary(
+                model,
+                input_size=(num_classes,512,512),
+                batch_size=1,
+                device="cpu"
+            )
         return model
     
 

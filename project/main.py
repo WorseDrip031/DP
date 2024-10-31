@@ -13,7 +13,7 @@ if __name__ == "__main__":
     p = ArgumentParser()
 
     # Experiment
-    p.add_argument("--name", "-n", type=str, default="Pretrained ResNet18 First Try", help="Experiment name")
+    p.add_argument("--name", "-n", type=str, default="Pretrained ViT with Downscaling", help="Experiment name")
 
     # Hyperparameters
     p.add_argument("--batch_size", "-bs", type=int, default=64, help="Batch size")
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     p.add_argument("--gleason_handling", "-gh", choices=["Separate", "Grouped"], default="Grouped", help="How to handle gleason classes")
 
     # Model
-    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "ViT"], default="ResNet18", help="Model Architecture")
+    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "ViT"], default="ViT", help="Model Architecture")
     p.add_argument("--use_pretrained_model", "-upm", choices=["Yes", "No"], default="Yes", help="Use pretrained model?")
     p.add_argument("--vit_technique", "-vt", choices=["Downscale", "Crop"], default="Downscale", help="ViT data preparation technique")
 
