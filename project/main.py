@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
     # Experiment
     p.add_argument("--name", "-n", type=str, default="Pretrained ViT with Downscaling", help="Experiment name")
+    p.add_argument("--project", "-p", choices=["DP-Classification"], default="DP-Classification", help="Project name")
 
     # Hyperparameters
     p.add_argument("--batch_size", "-bs", type=int, default=64, help="Batch size")
