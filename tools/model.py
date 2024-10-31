@@ -2,6 +2,7 @@ import timm
 import torch.nn as nn
 import torchvision.transforms as TVF
 import torchvision.models as models
+from transformers import ViTForImageClassification, ViTConfig
 
 class MultilayerPerceptron(nn.Module):
     def __init__(self, nin, nhidden, nout):
@@ -118,13 +119,21 @@ class ResNet50Model(nn.Module):
 class ViTModel(nn.Module):
     def __init__(self, num_classes, use_pretrained=True):
         super(ViTModel, self).__init__()
-        self.num_classes = num_classes
-
-        self.model = models.vit_b_32(pretrained=use_pretrained)
-        self.model.heads = nn.Linear(self.model.heads.in_features, num_classes)
+        
+        # Create a ViT configuration
+        config = ViTConfig.from_pretrained('google/vit-base-patch16-224-in21k')
+        
+        # Adjust the configuration for 512x512 input size
+        config.image_size = 512  # Set the image size to 512
+        config.num_labels = num_classes  # Set the number of classes
+        
+        # Load the model with the custom configuration
+        self.model = ViTForImageClassification(config)
 
     def forward(self, x):
-        return self.model(x)
+        # Pass input through the model
+        outputs = self.model(x)
+        return outputs.logits  # Return logits for classification
 
 
 class PretrainedVitModel(nn.Module):
@@ -132,7 +141,7 @@ class PretrainedVitModel(nn.Module):
         super(PretrainedVitModel, self).__init__()
         self.num_classes = num_classes
 
-        self.feature_extractor = timm.create_model("ViT-B-16-SigLIP-512", pretrained=True)
+        self.feature_extractor = timm.create_model('vit_base_patch16_siglip_512', pretrained=True)
         self.feature_extractor.reset_classifier(0, "")
 
         self.norm_transform = TVF.Normalize(
@@ -142,6 +151,10 @@ class PretrainedVitModel(nn.Module):
 
         for p in self.feature_extractor.parameters():
             p.requires_grad = False
+
+        for layer in list(self.feature_extractor.children())[-4:]:
+            for p in layer.parameters():
+                p.requires_grad = True
 
         self.head = nn.Linear(self.feature_extractor.num_features, num_classes)
 

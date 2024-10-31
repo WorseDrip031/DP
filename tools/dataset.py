@@ -518,7 +518,7 @@ class AGGC2022ClassificationDataset(Dataset):
         self.dataset_path = dataset_path
         self.image_transform = image_transform
         self.augmentation_transform = augmentation_transform
-        self.num_classes = 5
+        self.num_classes = 3
 
         # Find the smallest group and sample randomly from each group accordingly
         self.normal_path = dataset_path / "normal"
@@ -536,12 +536,22 @@ class AGGC2022ClassificationDataset(Dataset):
         self.g5_path = dataset_path / "g5"
         self.g5_patches = sorted(list(self.g5_path.rglob("*png")))
 
-        self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g3_patches, self.g4_patches, self.g5_patches]
-        self.list_min_length = min(len(lst) for lst in self.patch_litsts)
+        if self.num_classes == 5:
+            self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g3_patches, self.g4_patches, self.g5_patches]
+            self.list_min_length = min(len(lst) for lst in self.patch_litsts)
 
-        self.files = []
-        for lst in self.patch_litsts:
-            self.files.extend(random.sample(lst, self.list_min_length))
+            self.files = []
+            for lst in self.patch_litsts:
+                self.files.extend(random.sample(lst, self.list_min_length))
+        else:
+            self.g_patches = self.g3_patches + self.g4_patches + self.g5_patches
+
+            self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g_patches]
+            self.list_min_length = min(len(lst) for lst in self.patch_litsts)
+
+            self.files = []
+            for lst in self.patch_litsts:
+                self.files.extend(random.sample(lst, self.list_min_length))
             
 
     def __len__(self):
@@ -555,16 +565,28 @@ class AGGC2022ClassificationDataset(Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         label = torch.zeros(self.num_classes)
-        if image_path.parent.name == "normal":
-            label[0] = 1.0
-        elif image_path.parent.name == "stroma":
-            label[1] = 1.0
-        elif image_path.parent.name == "g3":
-            label[2] = 1.0
-        elif image_path.parent.name == "g4":
-            label[3] = 1.0
-        elif image_path.parent.name == "g5":
-            label[4] = 1.0
+        if self.num_classes == 5:
+            if image_path.parent.name == "normal":
+                label[0] = 1.0
+            elif image_path.parent.name == "stroma":
+                label[1] = 1.0
+            elif image_path.parent.name == "g3":
+                label[2] = 1.0
+            elif image_path.parent.name == "g4":
+                label[3] = 1.0
+            elif image_path.parent.name == "g5":
+                label[4] = 1.0
+        else:
+            if image_path.parent.name == "normal":
+                label[0] = 1.0
+            elif image_path.parent.name == "stroma":
+                label[1] = 1.0
+            elif image_path.parent.name == "g3":
+                label[2] = 1.0
+            elif image_path.parent.name == "g4":
+                label[2] = 1.0
+            elif image_path.parent.name == "g5":
+                label[2] = 1.0
 
         if self.image_transform is not None:
             image = self.image_transform(image)

@@ -15,7 +15,12 @@ class Trainer:
         self.datamodule = None
         self.cfg = cfg
         self.model = model.to(self.device)
-        self.opt = torch.optim.SGD(self.model.parameters(), lr=self.cfg.learning_rate)
+        #self.opt = torch.optim.SGD(self.model.parameters(), lr=self.cfg.learning_rate)
+        self.opt = torch.optim.Adam(
+            self.model.parameters(),
+            lr=self.cfg.learning_rate,
+            betas=(self.cfg.beta1, self.cfg.beta2)
+        )
         self.loss = nn.CrossEntropyLoss()
         self.acc = Accuracy("multiclass", num_classes=model.num_classes)
         
