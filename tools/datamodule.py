@@ -45,9 +45,16 @@ class AGGC2022ClassificationDatamodule:
     def __init__(self, cfg):
 
         self.augmentation_transform = None
-        self.input_transform = TF.Compose([
-            NumpyToTensor()
-        ])
+
+        if cfg.model_architecture == "ViT" and cfg.vit_technique == "Downscale":
+            self.input_transform = TF.Compose([
+                NumpyToTensor(),
+                TF.Resize(size=(224,224))
+            ])
+        else:
+            self.input_transform = TF.Compose([
+                NumpyToTensor()
+            ])
 
         if cfg.use_augmentations == "Yes":
             self.augmentation_transform = TF.Compose([
@@ -57,16 +64,19 @@ class AGGC2022ClassificationDatamodule:
             ])
 
         self.dataset_train = create_aggc_classification_dataset(
+            cfg,
             type="train",
             image_transform=self.input_transform,
             augmentation_transform=self.augmentation_transform
         )
         self.dataset_val = create_aggc_classification_dataset(
+            cfg,
             type="val",
             image_transform=self.input_transform,
             augmentation_transform=None
         )
         self.dataset_test = create_aggc_classification_dataset(
+            cfg,
             type="test",
             image_transform=self.input_transform,
             augmentation_transform=None

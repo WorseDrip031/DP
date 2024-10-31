@@ -119,48 +119,18 @@ class ResNet50Model(nn.Module):
 class ViTModel(nn.Module):
     def __init__(self, num_classes, use_pretrained=True):
         super(ViTModel, self).__init__()
-        
-        # Create a ViT configuration
-        config = ViTConfig.from_pretrained('google/vit-base-patch16-224-in21k')
-        
-        # Adjust the configuration for 512x512 input size
-        config.image_size = 512  # Set the image size to 512
-        config.num_labels = num_classes  # Set the number of classes
-        
-        # Load the model with the custom configuration
-        self.model = ViTForImageClassification(config)
-
-    def forward(self, x):
-        # Pass input through the model
-        outputs = self.model(x)
-        return outputs.logits  # Return logits for classification
-
-
-class PretrainedVitModel(nn.Module):
-    def __init__(self, num_classes):
-        super(PretrainedVitModel, self).__init__()
         self.num_classes = num_classes
 
-        self.feature_extractor = timm.create_model('vit_base_patch16_siglip_512', pretrained=True)
-        self.feature_extractor.reset_classifier(0, "")
-
-        self.norm_transform = TVF.Normalize(
-            mean=self.feature_extractor.default_cfg["mean"],
-            std=self.feature_extractor.default_cfg["std"]
-        )
-
-        for p in self.feature_extractor.parameters():
-            p.requires_grad = False
-
-        for layer in list(self.feature_extractor.children())[-4:]:
-            for p in layer.parameters():
-                p.requires_grad = True
-
-        self.head = nn.Linear(self.feature_extractor.num_features, num_classes)
+        # Load a ViT model with a configuration for image classification
+        config = ViTConfig.from_pretrained("google/vit-base-patch16-224-in21k")
+        config.num_labels = num_classes  # Set the number of classes
+        
+        if use_pretrained:
+            self.model = ViTForImageClassification.from_pretrained(
+                "google/vit-base-patch16-224-in21k", config=config
+            )
+        else:
+            self.model = ViTForImageClassification(config)
 
     def forward(self, x):
-        x = self.norm_transform(x)
-        f = self.feature_extractor(x)
-        f = f[:,0]
-        logits = self.head(f)
-        return logits
+        return self.model(x).logits  # Return the logits for classification

@@ -24,10 +24,12 @@ if __name__ == "__main__":
     p.add_argument("--beta2", "-b2", type=float, default=0.999, help="Optimizer beta2")
     p.add_argument("--num_hidden", "-nh", type=int, default=512, help="Number of hidden units")
     p.add_argument("--use_augmentations", "-ua", choices=["Yes", "No"], default="Yes", help="Use augmentations?")
-    p.add_argument("--use_pretrained_model", "-upm", choices=["Yes", "No"], default="Yes", help="Use pretrained model?")
+    p.add_argument("--gleason_handling", "-gh", choices=["Separate", "Grouped"], default="Grouped", help="How to handle gleason classes")
 
     # Model
-    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "PretrainedViT", "ViT"], default="ResNet18", help="Model Architecture")
+    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "ViT"], default="ResNet18", help="Model Architecture")
+    p.add_argument("--use_pretrained_model", "-upm", choices=["Yes", "No"], default="Yes", help="Use pretrained model?")
+    p.add_argument("--vit_technique", "-vt", choices=["Downscale", "Crop"], default="Downscale", help="ViT data preparation technique")
 
     cfg = p.parse_args()
     main(cfg)

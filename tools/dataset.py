@@ -514,11 +514,16 @@ def create_aggc_dataset(type="train", **kwargs):
 
 
 class AGGC2022ClassificationDataset(Dataset):
-    def __init__(self, dataset_path: Path, image_transform, augmentation_transform):
+    def __init__(self, cfg, dataset_path: Path, image_transform, augmentation_transform):
         self.dataset_path = dataset_path
         self.image_transform = image_transform
         self.augmentation_transform = augmentation_transform
-        self.num_classes = 3
+        self.cfg = cfg
+
+        if self.cfg.gleason_handling == "Grouped":
+            self.num_classes = 3
+        else:
+            self.num_classes = 5
 
         # Find the smallest group and sample randomly from each group accordingly
         self.normal_path = dataset_path / "normal"
@@ -563,6 +568,14 @@ class AGGC2022ClassificationDataset(Dataset):
 
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "Crop":
+            # Define crop dimensions for a 224x224 patch from the center
+            height, width, _ = image.shape
+            crop_size = 224
+            start_x = (width - crop_size) // 2  # Starting x-coordinate for center crop
+            start_y = (height - crop_size) // 2  # Starting y-coordinate for center crop
+            image = image[start_y:start_y + crop_size, start_x:start_x + crop_size]
 
         label = torch.zeros(self.num_classes)
         if self.num_classes == 5:
@@ -688,7 +701,7 @@ def pre_process_classification_dataset(dataset_folder):
 
 
 
-def create_aggc_classification_dataset(type="train", **kwargs):
+def create_aggc_classification_dataset(cfg, type="train", **kwargs):
 
     # Pre-process dataset if neccessary
     dataset_folder = DATASET_BASEPATH / "AGGC-2022"
@@ -714,4 +727,4 @@ def create_aggc_classification_dataset(type="train", **kwargs):
     else:
         return None
     
-    return AGGC2022ClassificationDataset(images_folder, **kwargs)
+    return AGGC2022ClassificationDataset(cfg, images_folder, **kwargs)

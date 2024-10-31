@@ -193,25 +193,31 @@ class AGGCClassificationExperiment:
 
 
     def create_model(self, cfg):
+
+        # Determine the number of classes
+        if cfg.gleason_handling == "Grouped":
+            num_classes = 3
+        else:
+            num_classes = 5
+
+        # Determine if to use pretrained model
         use_pretrained = True
         if cfg.use_pretrained_model == "No":
             use_pretrained = False
 
         if cfg.model_architecture == "ResNet18":
-            model = ResNet18Model(3, use_pretrained)
+            model = ResNet18Model(num_classes, use_pretrained)
         elif cfg.model_architecture == "ResNet50":
-            model = ResNet50Model(3, use_pretrained)
-        elif cfg.model_architecture == "PretrainedViT":
-            model = PretrainedVitModel(3)
+            model = ResNet50Model(num_classes, use_pretrained)
         elif cfg.model_architecture == "ViT":
-            model = ViTModel(3, use_pretrained)
+            model = ViTModel(num_classes, use_pretrained)
         else:
             raise Exception(f"Invalid architecture: {cfg.model_architecture}")
         
         print("Creating model: ")
         summary(
             model,
-            input_size=(3,512,512),
+            input_size=(num_classes,512,512),
             batch_size=1,
             device="cpu"
         )
