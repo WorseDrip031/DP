@@ -13,7 +13,7 @@ if __name__ == "__main__":
     p = ArgumentParser()
 
     # Experiment
-    p.add_argument("--name", "-n", type=str, default="0003 - Pretrained ViT Grouped Cropped", help="Experiment name")
+    p.add_argument("--name", "-n", type=str, default="0004 - Pretrained ViT Grouped QuintupleCropped", help="Experiment name")
     p.add_argument("--project", "-p", choices=["DP-Classification"], default="DP-Classification", help="Project name")
 
     # Hyperparameters
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "ViT"], default="ViT", help="Model Architecture")
     p.add_argument("--use_pretrained_model", "-upm", choices=["Yes", "No"], default="Yes", help="Use pretrained model?")
     p.add_argument("--use_frozen_model", "-ufm", choices=["Yes", "No"], default="No", help="Use frozen model?")
-    p.add_argument("--vit_technique", "-vt", choices=["Downscale", "Crop"], default="Crop", help="ViT data preparation technique")
+    p.add_argument("--vit_technique", "-vt", choices=["Downscale", "Crop", "QuintupleCrop"], default="QuintupleCrop", help="ViT data preparation technique")
 
     cfg = p.parse_args()
     main(cfg)

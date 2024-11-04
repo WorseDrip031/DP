@@ -545,18 +545,38 @@ class AGGC2022ClassificationDataset(Dataset):
             self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g3_patches, self.g4_patches, self.g5_patches]
             self.list_min_length = min(len(lst) for lst in self.patch_litsts)
 
-            self.files = []
-            for lst in self.patch_litsts:
-                self.files.extend(random.sample(lst, self.list_min_length))
+            # Quintiple the dataset if the option is chosen
+            if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "QuintupleCrop":
+                self.files = []
+                for _ in range(5):
+                    files = []
+                    for lst in self.patch_lists:
+                        files.extend(random.sample(lst, self.list_min_length))
+                    self.files.extend(files)
+            else:
+                self.files = []
+                for lst in self.patch_litsts:
+                    self.files.extend(random.sample(lst, self.list_min_length))
         else:
             self.g_patches = self.g3_patches + self.g4_patches + self.g5_patches
 
             self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g_patches]
             self.list_min_length = min(len(lst) for lst in self.patch_litsts)
 
-            self.files = []
-            for lst in self.patch_litsts:
-                self.files.extend(random.sample(lst, self.list_min_length))
+            # Quintiple the dataset if the option is chosen
+            if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "QuintupleCrop":
+                self.files = []
+                for _ in range(5):
+                    files = []
+                    for lst in self.patch_lists:
+                        files.extend(random.sample(lst, self.list_min_length))
+                    self.files.extend(files)
+            else:
+                self.files = []
+                for lst in self.patch_litsts:
+                    self.files.extend(random.sample(lst, self.list_min_length))
+
+            
             
 
     def __len__(self):
@@ -575,6 +595,34 @@ class AGGC2022ClassificationDataset(Dataset):
             crop_size = 224
             start_x = (width - crop_size) // 2  # Starting x-coordinate for center crop
             start_y = (height - crop_size) // 2  # Starting y-coordinate for center crop
+            image = image[start_y:start_y + crop_size, start_x:start_x + crop_size]
+
+        if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "QuintupleCrop":
+            batch_size = len(self.files) / 5
+            order_of_batch = index // batch_size
+
+            height, width, _ = image.shape
+            crop_size = 224
+
+            # Determine the starting x and y coordinates for cropping based on order_of_batch
+            if order_of_batch == 0:  # Center crop
+                start_x = (width - crop_size) // 2
+                start_y = (height - crop_size) // 2
+            elif order_of_batch == 1:  # Top-left corner
+                start_x = 0
+                start_y = 0
+            elif order_of_batch == 2:  # Top-right corner
+                start_x = width - crop_size
+                start_y = 0
+            elif order_of_batch == 3:  # Bottom-left corner
+                start_x = 0
+                start_y = height - crop_size
+            elif order_of_batch == 4:  # Bottom-right corner
+                start_x = width - crop_size
+                start_y = height - crop_size
+            else:
+                raise ValueError("order_of_batch must be between 0 and 4")
+
             image = image[start_y:start_y + crop_size, start_x:start_x + crop_size]
 
         label = torch.zeros(self.num_classes)
