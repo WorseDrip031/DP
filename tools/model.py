@@ -117,20 +117,32 @@ class ResNet50Model(nn.Module):
     
 
 class ViTModel(nn.Module):
-    def __init__(self, num_classes, use_pretrained=True):
+    def __init__(self, num_classes, use_pretrained=True, use_frozen=True):
         super(ViTModel, self).__init__()
         self.num_classes = num_classes
 
-        # Load a ViT model with a configuration for image classification
-        config = ViTConfig.from_pretrained("google/vit-base-patch16-224-in21k")
-        config.num_labels = num_classes  # Set the number of classes
-        
-        if use_pretrained:
-            self.model = ViTForImageClassification.from_pretrained(
-                "google/vit-base-patch16-224-in21k", config=config
-            )
-        else:
-            self.model = ViTForImageClassification(config)
+        # Create model
+        self.feature_extractor = timm.create_model("vit_base_patch16_224.augreg2_in21k_ft_in1k", pretrained=use_pretrained)
+        self.feature_extractor.reset_classifier(0, "")
+        self.head = nn.Sequential(
+            nn.Linear(self.feature_extractor.num_features, num_classes)
+        )
+
+        # Freeze parameters
+        if use_frozen:
+            for p in self.feature_extractor.parameters():
+                p.requires_grad = False
+
+        # Normalization transform
+        self.norm_transform = TVF.Normalize(
+            mean=self.feature_extractor.default_cfg["mean"],
+            std=self.feature_extractor.default_cfg["std"]
+        )
+
 
     def forward(self, x):
-        return self.model(x).logits  # Return the logits for classification
+        x = self.norm_transform(x)
+        f = self.feature_extractor(x)
+        f = f[:,0]
+        logits = self.head(f)
+        return logits

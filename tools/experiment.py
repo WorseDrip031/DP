@@ -205,12 +205,17 @@ class AGGCClassificationExperiment:
         if cfg.use_pretrained_model == "No":
             use_pretrained = False
 
+        # Determine if to use frozen model
+        use_frozen = True
+        if cfg.use_frozen_model == "No":
+            use_frozen = False
+
         if cfg.model_architecture == "ResNet18":
             model = ResNet18Model(num_classes, use_pretrained)
         elif cfg.model_architecture == "ResNet50":
             model = ResNet50Model(num_classes, use_pretrained)
         elif cfg.model_architecture == "ViT":
-            model = ViTModel(num_classes, use_pretrained)
+            model = ViTModel(num_classes, use_pretrained, use_frozen)
         else:
             raise Exception(f"Invalid architecture: {cfg.model_architecture}")
         
@@ -219,6 +224,13 @@ class AGGCClassificationExperiment:
             summary(
                 model,
                 input_size=(num_classes,512,512),
+                batch_size=1,
+                device="cpu"
+            )
+        else:
+            summary(
+                model,
+                input_size=(num_classes,224,224),
                 batch_size=1,
                 device="cpu"
             )
