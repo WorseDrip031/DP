@@ -542,8 +542,8 @@ class AGGC2022ClassificationDataset(Dataset):
         self.g5_patches = sorted(list(self.g5_path.rglob("*png")))
 
         if self.num_classes == 5:
-            self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g3_patches, self.g4_patches, self.g5_patches]
-            self.list_min_length = min(len(lst) for lst in self.patch_litsts)
+            self.patch_lists = [self.normal_patches, self.stroma_patches, self.g3_patches, self.g4_patches, self.g5_patches]
+            self.list_min_length = min(len(lst) for lst in self.patch_lists)
 
             # Quintiple the dataset if the option is chosen
             if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "QuintupleCrop":
@@ -555,13 +555,13 @@ class AGGC2022ClassificationDataset(Dataset):
                     self.files.extend(files)
             else:
                 self.files = []
-                for lst in self.patch_litsts:
+                for lst in self.patch_lists:
                     self.files.extend(random.sample(lst, self.list_min_length))
         else:
             self.g_patches = self.g3_patches + self.g4_patches + self.g5_patches
 
-            self.patch_litsts = [self.normal_patches, self.stroma_patches, self.g_patches]
-            self.list_min_length = min(len(lst) for lst in self.patch_litsts)
+            self.patch_lists = [self.normal_patches, self.stroma_patches, self.g_patches]
+            self.list_min_length = min(len(lst) for lst in self.patch_lists)
 
             # Quintiple the dataset if the option is chosen
             if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "QuintupleCrop":
@@ -573,7 +573,7 @@ class AGGC2022ClassificationDataset(Dataset):
                     self.files.extend(files)
             else:
                 self.files = []
-                for lst in self.patch_litsts:
+                for lst in self.patch_lists:
                     self.files.extend(random.sample(lst, self.list_min_length))
 
             
