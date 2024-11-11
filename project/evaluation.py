@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-from captum.attr import IntegratedGradients, Saliency, visualization
+from captum.attr import IntegratedGradients, Saliency, visualization, Occlusion
 
 from tools.model import ResNet18Model
 
@@ -27,10 +27,12 @@ def preprocess_image(image_path):
 def evaluate_with_captum(model, image_tensor, target_class):
     ig = IntegratedGradients(model)
     saliency = Saliency(model)
+    occlusion = Occlusion(model)
     image_tensor.requires_grad = True
     baseline = torch.zeros_like(image_tensor)
     attributions_ig = ig.attribute(image_tensor, baseline, target=target_class, n_steps=50)
     attributions_saliency = saliency.attribute(image_tensor, target=target_class)
+    attributions_occ = occlusion.attribute(image_tensor, target=target_class, strides=(3, 8, 8), sliding_window_shapes=(3, 15, 15), baselines=0)
 
     _ = visualization.visualize_image_attr(
         np.transpose(attributions_ig.squeeze().cpu().detach().numpy(), (1, 2, 0)),
@@ -48,6 +50,16 @@ def evaluate_with_captum(model, image_tensor, target_class):
         sign="absolute_value",
         show_colorbar=True,
         title="Saliency Map Attribution"
+    )
+
+    _ = visualization.visualize_image_attr(
+        np.transpose(attributions_occ.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        np.transpose(image_tensor.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        ["original_image", "heat_map", "heat_map", "masked_image"],
+        ["all", "positive", "negative", "positive"],
+        show_colorbar=True,
+        title=["Original", "Positive Attribution", "Negative Attribution", "Masked"],
+        fig_size=(18,6)
     )
 
 if __name__ == "__main__":
