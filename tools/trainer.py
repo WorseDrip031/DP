@@ -33,29 +33,56 @@ class Trainer:
     def fit(self):
         self.log.on_training_start()
 
-        with wandb.init(
-            project=self.cfg.project,
-            config=vars(self.cfg),
-        ) as run:
-            wandb.watch(self.model)
-            
-            for epoch in range(self.cfg.max_epochs):
+        if self.cfg.continue_from_checkpoint == "Yes":
+            with wandb.init(
+                project=self.cfg.project,
+                config=vars(self.cfg),
+                id=self.cfg.run_id,
+                resume="must"
+            ) as run:
+                wandb.watch(self.model)
                 
-                stats_train = Statistics()
-                self.train_epoch(epoch, self.model, self.datamodule.dataloader_train, stats_train)
-                        
-                stats_val = Statistics()
-                self.validate_epoch(epoch, self.model, self.datamodule.dataloader_val, stats_val)
+                for epoch in range(self.cfg.max_epochs):
+                    
+                    stats_train = Statistics()
+                    self.train_epoch(epoch, self.model, self.datamodule.dataloader_train, stats_train)
+                            
+                    stats_val = Statistics()
+                    self.validate_epoch(epoch, self.model, self.datamodule.dataloader_val, stats_val)
 
-                self.log.on_epoch_complete(epoch, Statistics.merge(stats_train, stats_val))
-                run.log({
-                    "Epoch Train Loss": stats_train.get()["loss_train"],
-                    "Epoch Train Accuracy": stats_train.get()["acc_train"],
-                    "Epoch Val Loss": stats_val.get()["loss_val"],
-                    "Epoch Val Accuracy": stats_val.get()["acc_val"]
-                })
+                    self.log.on_epoch_complete(epoch, Statistics.merge(stats_train, stats_val))
+                    run.log({
+                        "Epoch Train Loss": stats_train.get()["loss_train"],
+                        "Epoch Train Accuracy": stats_train.get()["acc_train"],
+                        "Epoch Val Loss": stats_val.get()["loss_val"],
+                        "Epoch Val Accuracy": stats_val.get()["acc_val"]
+                    })
 
-            self.log.on_training_stop()
+                self.log.on_training_stop()
+        else:
+            with wandb.init(
+                project=self.cfg.project,
+                config=vars(self.cfg),
+            ) as run:
+                wandb.watch(self.model)
+                
+                for epoch in range(self.cfg.max_epochs):
+                    
+                    stats_train = Statistics()
+                    self.train_epoch(epoch, self.model, self.datamodule.dataloader_train, stats_train)
+                            
+                    stats_val = Statistics()
+                    self.validate_epoch(epoch, self.model, self.datamodule.dataloader_val, stats_val)
+
+                    self.log.on_epoch_complete(epoch, Statistics.merge(stats_train, stats_val))
+                    run.log({
+                        "Epoch Train Loss": stats_train.get()["loss_train"],
+                        "Epoch Train Accuracy": stats_train.get()["acc_train"],
+                        "Epoch Val Loss": stats_val.get()["loss_val"],
+                        "Epoch Val Accuracy": stats_val.get()["acc_val"]
+                    })
+
+                self.log.on_training_stop()
 
     def train_epoch(self, epoch, model, dataloader, stats):
         model.train()

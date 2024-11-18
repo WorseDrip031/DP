@@ -1,6 +1,8 @@
 from pathlib import Path
 import yaml
 import torch
+import os
+import re
 from torchsummary import summary
 from argparse import Namespace
 
@@ -144,7 +146,7 @@ class Experiment:
 
 
 class AGGCClassificationExperiment:
-    def __init__(self, cfg, load_checkpoint_filepath=None):
+    def __init__(self, cfg):
         self.cfg = cfg
         self.experiment_path = BASE_PATH / cfg.name
         
@@ -152,8 +154,13 @@ class AGGCClassificationExperiment:
         self.datamodule = AGGC2022ClassificationDatamodule(cfg)
         self.model = self.create_model(cfg)
 
-        if load_checkpoint_filepath is not None:
-            file_path =  self.experiment_path / "checkpoints" / load_checkpoint_filepath
+        continue_from_checkpoint = False
+        if cfg.continue_from_checkpoint == "Yes":
+            continue_from_checkpoint = True
+
+        if continue_from_checkpoint:
+            checkpoints_folder = self.experiment_path / "checkpoints"
+            file_path = self.get_last_checkpoint(checkpoints_folder)
             print(f" > Loading checkpoint: {file_path.as_posix()}")
             checkpoint = torch.load(
                 file_path.as_posix(),
@@ -190,6 +197,23 @@ class AGGCClassificationExperiment:
             checkpoint_filename = f"checkpoint-{checkpoint_epoch:04d}.pt"
 
         experiment = Experiment(cfg, load_checkpoint_filepath=checkpoint_filename)
+
+    
+    def get_last_checkpoint(self, checkpoints_folder):
+        max_number = -1
+        for file_name in os.listdir(checkpoints_folder):
+            if file_name == "last.pt":
+                highest_checkpoint = file_name
+                break
+            else:
+                # Match checkpoint files with a pattern like 'checkpoint-XXXX.pt'
+                match = re.match(r"checkpoint-(\d+)\.pt", file_name)
+                if match:
+                    checkpoint_number = int(match.group(1))
+                    if checkpoint_number > max_number:
+                        max_number = checkpoint_number
+                        highest_checkpoint = file_name
+        return checkpoints_folder / highest_checkpoint
 
 
     def create_model(self, cfg):
