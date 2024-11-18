@@ -11,7 +11,8 @@ from tqdm import tqdm
 
 from tools.model import ResNet18Model, ResNet50Model, ViTModel
 
-
+import matplotlib
+matplotlib.use('Agg')
 
 
 
@@ -48,7 +49,8 @@ def find_highest_checkpoint(base_path):
 
                 # If a highest checkpoint is found, add it to the list
                 if highest_checkpoint:
-                    list_checkpoints.append(highest_checkpoint)
+                    highest_checkpoint_path = f"{base_path}/{experiment_folder}/checkpoints/{highest_checkpoint}"
+                    list_checkpoints.append(highest_checkpoint_path)
 
     return list_checkpoints
 
@@ -75,6 +77,7 @@ def get_all_hyperparameters(base_path):
                     use_pretrained_model = config.get("use_pretrained_model", "N/A")
                     use_frozen_model = config.get("use_frozen_model", "N/A")
                     name = config.get("name", "N/A")
+                    vit_technique = config.get("vit_technique", "N/A")
 
                     # Create a dictionary with the retrieved variables
                     hyperparameters = {
@@ -82,7 +85,8 @@ def get_all_hyperparameters(base_path):
                         "model_architecture": model_architecture,
                         "use_pretrained_model": use_pretrained_model,
                         "use_frozen_model": use_frozen_model,
-                        "name": name
+                        "name": name,
+                        "vit_technique": vit_technique
                     }
 
                     # Add the dictionary to the list
@@ -102,12 +106,12 @@ def load_models(list_state_dict_paths, list_dict_hyperparameters):
 
     for i in tqdm(range(len(list_state_dict_paths)), desc="Loading models", ncols=100):
         state_dict_path = list_state_dict_paths[i]
-        list_dict_hyperparameters = list_dict_hyperparameters[i]
+        dict_hyperparameters = list_dict_hyperparameters[i]
 
-        gleason_handling = list_dict_hyperparameters["gleason_handling"]
-        model_architecture = list_dict_hyperparameters["model_architecture"]
-        use_pretrained_model = list_dict_hyperparameters["use_pretrained_model"]
-        use_frozen_model = list_dict_hyperparameters["use_frozen_model"]
+        gleason_handling = dict_hyperparameters["gleason_handling"]
+        model_architecture = dict_hyperparameters["model_architecture"]
+        use_pretrained_model = dict_hyperparameters["use_pretrained_model"]
+        use_frozen_model = dict_hyperparameters["use_frozen_model"]
 
         # Determine the number of classes
         if gleason_handling == "Grouped":
@@ -148,11 +152,29 @@ def load_models(list_state_dict_paths, list_dict_hyperparameters):
 
 
 
-def preprocess_image(image_path):
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
+def preprocess_image(image_path, vit_technique):
+
+    if vit_technique == "Downscale":
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor()
+        ])
+    else:
+        transform = transforms.Compose([
+            transforms.ToTensor()
+        ])
+
     image = datasets.folder.default_loader(image_path)
+
+    if vit_technique == "Crop" or vit_technique == "QuintupleCrop":
+        # Crop the image to the center (224x224)
+        width, height = image.size
+        left = (width - 224) // 2
+        top = (height - 224) // 2
+        right = (width + 224) // 2
+        bottom = (height + 224) // 2
+        image = image.crop((left, top, right, bottom))
+        
     image_tensor = transform(image).unsqueeze(0)
     return image_tensor
 
@@ -160,20 +182,17 @@ def preprocess_image(image_path):
 
 
 
-def find_correct_and_incorrect_images(model, folder_path, target_class):
+def find_correct_and_incorrect_images(model, folder_path, target_class, vit_technique):
     
     correct_image = None
     incorrect_image = None
-
-    # Get a list of image files in the folder and add a progress bar with tqdm
-    image_files = [file_name for file_name in os.listdir(folder_path) if file_name.lower().endswith(('.png'))]
     
-    # Iterate over all images in the folder with tqdm for progress bar
-    for file_name in tqdm(image_files, desc="Processing images", ncols=100):
+    # Iterate over all images in the folder
+    for file_name in os.listdir(folder_path):
         image_path = os.path.join(folder_path, file_name)
         
         # Open the image and apply transformations
-        image_tensor = preprocess_image(image_path)
+        image_tensor = preprocess_image(image_path, vit_technique)
         
         # Make a prediction using the model
         with torch.no_grad():
@@ -204,6 +223,7 @@ def find_suitable_images(list_models, list_dict_hyperparameters):
         model = list_models[i]
         dict_hyperparameters = list_dict_hyperparameters[i]
         gleason_handling = dict_hyperparameters["gleason_handling"]
+        vit_technique = dict_hyperparameters["vit_technique"]
 
         # Determine the number of classes
         if gleason_handling == "Grouped":
@@ -211,27 +231,27 @@ def find_suitable_images(list_models, list_dict_hyperparameters):
         else:
             num_classes = 5
 
-        normal_correct, normal_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/normal", 0)
-        stroma_correct, stroma_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/stroma", 1)
-        g3_correct, g3_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g3", 2)
+        normal_correct, normal_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/normal", 0, vit_technique)
+        stroma_correct, stroma_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/stroma", 1, vit_technique)
+        g3_correct, g3_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g3", 2, vit_technique)
         if num_classes == 5:
-            g4_correct, g4_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g4", 3)
-            g5_correct, g5_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g5", 4)
+            g4_correct, g4_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g4", 3, vit_technique)
+            g5_correct, g5_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g5", 4, vit_technique)
 
         dict_image_tensors = {
-            "normal_correct": preprocess_image(normal_correct),
-            "normal_incorrect": preprocess_image(normal_incorrect),
-            "stroma_correct": preprocess_image(stroma_correct),
-            "stroma_incorrect": preprocess_image(stroma_incorrect),
-            "g3_correct": preprocess_image(g3_correct),
-            "g3_incorrect": preprocess_image(g3_incorrect)
+            "normal_correct": preprocess_image(normal_correct, vit_technique),
+            "normal_incorrect": preprocess_image(normal_incorrect, vit_technique),
+            "stroma_correct": preprocess_image(stroma_correct, vit_technique),
+            "stroma_incorrect": preprocess_image(stroma_incorrect, vit_technique),
+            "g3_correct": preprocess_image(g3_correct, vit_technique),
+            "g3_incorrect": preprocess_image(g3_incorrect, vit_technique)
         }
         if num_classes == 5:
             dict_image_tensors.update({
-                "g4_correct": preprocess_image(g4_correct),
-                "g4_incorrect": preprocess_image(g4_incorrect),
-                "g5_correct": preprocess_image(g5_correct),
-                "g5_incorrect": preprocess_image(g5_incorrect)
+                "g4_correct": preprocess_image(g4_correct, vit_technique),
+                "g4_incorrect": preprocess_image(g4_incorrect, vit_technique),
+                "g5_correct": preprocess_image(g5_correct, vit_technique),
+                "g5_incorrect": preprocess_image(g5_incorrect, vit_technique)
             })
         
         list_dict_image_tensors.append(dict_image_tensors)
