@@ -55,11 +55,37 @@ def evaluate_with_captum(model, image_tensor, target_class):
     _ = visualization.visualize_image_attr(
         np.transpose(attributions_occ.squeeze().cpu().detach().numpy(), (1, 2, 0)),
         np.transpose(image_tensor.squeeze().cpu().detach().numpy(), (1, 2, 0)),
-        ["original_image", "heat_map", "heat_map", "masked_image"],
-        ["all", "positive", "negative", "positive"],
+        method="original_image",
+        sign="all",
         show_colorbar=True,
-        title=["Original", "Positive Attribution", "Negative Attribution", "Masked"],
-        fig_size=(18,6)
+        title="Original Image"
+    )
+
+    _ = visualization.visualize_image_attr(
+        np.transpose(attributions_occ.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        np.transpose(image_tensor.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        method="heat_map",
+        sign="positive",
+        show_colorbar=True,
+        title="Positive Attribution"
+    )
+
+    _ = visualization.visualize_image_attr(
+        np.transpose(attributions_occ.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        np.transpose(image_tensor.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        method="heat_map",
+        sign="negative",
+        show_colorbar=True,
+        title="Negative Attribution"
+    )
+
+    _ = visualization.visualize_image_attr(
+        np.transpose(attributions_occ.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        np.transpose(image_tensor.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+        method="masked_image",
+        sign="positive",
+        show_colorbar=True,
+        title="Masked Image"
     )
 
 if __name__ == "__main__":
