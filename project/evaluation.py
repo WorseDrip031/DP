@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 from captum.attr import IntegratedGradients, Saliency, visualization, Occlusion
+from tqdm import tqdm
 
 from tools.model import ResNet18Model, ResNet50Model, ViTModel
 
@@ -16,7 +17,7 @@ from tools.model import ResNet18Model, ResNet50Model, ViTModel
 
 def find_highest_checkpoint(base_path):
     # Iterate through all subfolders in the base directory
-    for root, dirs, _ in os.walk(base_path):
+    for root, dirs, _ in tqdm(os.walk(base_path), desc="Scanning directories"):
         list_checkpoints = []
         if "checkpoints" in dirs:
             checkpoints_path = os.path.join(root, "checkpoints")
@@ -50,7 +51,7 @@ def get_all_hyperparameters(base_path):
     hyperparameters_list = []
 
     # Iterate over all subdirectories in the base path
-    for root, _, files in os.walk(base_path):
+    for root, _, files in tqdm(os.walk(base_path), desc="Scanning directories for config.yaml"):
         # Check if 'config.yaml' is in the current folder
         if "config.yaml" in files:
             config_path = os.path.join(root, "config.yaml")
@@ -90,7 +91,7 @@ def load_models(list_state_dict_paths, list_dict_hyperparameters):
 
     models = []
 
-    for i in range(len(list_state_dict_paths)):
+    for i in tqdm(range(len(list_state_dict_paths)), desc="Loading models", ncols=100):
         state_dict_path = list_state_dict_paths[i]
         list_dict_hyperparameters = list_dict_hyperparameters[i]
 
@@ -155,28 +156,30 @@ def find_correct_and_incorrect_images(model, folder_path, target_class):
     correct_image = None
     incorrect_image = None
 
-    # Iterate over all images in the folder
-    for file_name in os.listdir(folder_path):
-        if file_name.lower().endswith(('.png')):  # Check for image files
-            image_path = os.path.join(folder_path, file_name)
-            
-            # Open the image and apply transformations
-            image_tensor = preprocess_image(image_path)
-            
-            # Make a prediction using the model
-            with torch.no_grad():
-                output = model(image_tensor)
-                predicted_class = torch.argmax(output, dim=1).item()
-            
-            # Check if the prediction is correct or incorrect
-            if predicted_class == target_class and correct_image is None:
-                correct_image = image_path
-            elif predicted_class != target_class and incorrect_image is None:
-                incorrect_image = image_path
+    # Get a list of image files in the folder and add a progress bar with tqdm
+    image_files = [file_name for file_name in os.listdir(folder_path) if file_name.lower().endswith(('.png'))]
+    
+    # Iterate over all images in the folder with tqdm for progress bar
+    for file_name in tqdm(image_files, desc="Processing images", ncols=100):
+        image_path = os.path.join(folder_path, file_name)
+        
+        # Open the image and apply transformations
+        image_tensor = preprocess_image(image_path)
+        
+        # Make a prediction using the model
+        with torch.no_grad():
+            output = model(image_tensor)
+            predicted_class = torch.argmax(output, dim=1).item()
+        
+        # Check if the prediction is correct or incorrect
+        if predicted_class == target_class and correct_image is None:
+            correct_image = image_path
+        elif predicted_class != target_class and incorrect_image is None:
+            incorrect_image = image_path
 
-            # Stop if both images are found
-            if correct_image and incorrect_image:
-                break
+        # Stop if both images are found
+        if correct_image and incorrect_image:
+            break
 
     return correct_image, incorrect_image
 
@@ -188,7 +191,7 @@ def find_suitable_images(list_models, list_dict_hyperparameters):
     
     list_dict_image_tensors = []
 
-    for i in range(len(list_models)):
+    for i in tqdm(range(len(list_models)), desc="Finding suitable images", ncols=100):
         model = list_models[i]
         dict_hyperparameters = list_dict_hyperparameters[i]
         gleason_handling = dict_hyperparameters["gleason_handling"]
@@ -293,7 +296,7 @@ def evaluate_with_captum(model, image_tensor, target_class, experiment_name, ima
 
 def evaluate_all_models(list_models, list_dict_hyperparameters, list_dict_image_tensors):
     
-    for i in range(len(list_models)):
+    for i in tqdm(range(len(list_models)), desc="Evaluating models", ncols=100):
         model = list_models[i]
         dict_image_tensors = list_dict_image_tensors[i]
         dict_hyperparameters = list_dict_hyperparameters[i]
