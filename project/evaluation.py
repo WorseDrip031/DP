@@ -16,30 +16,39 @@ from tools.model import ResNet18Model, ResNet50Model, ViTModel
 
 
 def find_highest_checkpoint(base_path):
-    # Iterate through all subfolders in the base directory
-    for root, dirs, _ in tqdm(os.walk(base_path), desc="Scanning directories"):
-        list_checkpoints = []
-        if "checkpoints" in dirs:
-            checkpoints_path = os.path.join(root, "checkpoints")
-            highest_checkpoint = None
-            max_number = -1
+
+    list_checkpoints = []
+
+    # Iterate over all the experiment folders inside the base path
+    for experiment_folder in os.listdir(base_path):
+        experiment_path = os.path.join(base_path, experiment_folder)
+
+        # Check if the current folder is a directory (to skip files in base_path)
+        if os.path.isdir(experiment_path):
+            checkpoints_path = os.path.join(experiment_path, "checkpoints")
             
-            # List all files in the checkpoints directory
-            for file_name in os.listdir(checkpoints_path):
-                if file_name == "last.pt":
-                    highest_checkpoint = file_name
-                    break
-                else:
-                    # Match checkpoint files with a pattern like 'checkpoint-XXXX.pt'
-                    match = re.match(r"checkpoint-(\d+)\.pt", file_name)
-                    if match:
-                        checkpoint_number = int(match.group(1))
-                        if checkpoint_number > max_number:
-                            max_number = checkpoint_number
-                            highest_checkpoint = file_name
-            
-            if highest_checkpoint:
-                list_checkpoints.append(highest_checkpoint)
+            # If 'checkpoints' folder exists inside the experiment folder
+            if os.path.isdir(checkpoints_path):
+                highest_checkpoint = None
+                max_number = -1
+
+                # List all files in the checkpoints directory
+                for file_name in os.listdir(checkpoints_path):
+                    if file_name == "last.pt":
+                        highest_checkpoint = file_name
+                        break
+                    else:
+                        # Match checkpoint files with a pattern like 'checkpoint-XXXX.pt'
+                        match = re.match(r"checkpoint-(\d+)\.pt", file_name)
+                        if match:
+                            checkpoint_number = int(match.group(1))
+                            if checkpoint_number > max_number:
+                                max_number = checkpoint_number
+                                highest_checkpoint = file_name
+
+                # If a highest checkpoint is found, add it to the list
+                if highest_checkpoint:
+                    list_checkpoints.append(highest_checkpoint)
 
     return list_checkpoints
 
