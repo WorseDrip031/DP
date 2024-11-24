@@ -8,6 +8,7 @@ import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 from captum.attr import IntegratedGradients, Saliency, visualization, Occlusion
 from tqdm import tqdm
+from collections import defaultdict
 
 from tools.model import ResNet18Model, ResNet50Model, ViTModel
 
@@ -182,13 +183,19 @@ def preprocess_image(image_path, vit_technique):
 
 
 
-def find_correct_and_incorrect_images(model, folder_path, target_class, vit_technique):
+def find_all_classification_combinations(model, folder_path, target_class, vit_technique, num_combinations, images_per_combination):
+
+    classification_combinations = defaultdict(list)
     
-    correct_image = None
-    incorrect_image = None
+    # Initialize counters to track how many images we have for each combination
+    combination_counters = defaultdict(int)
     
     # Iterate over all images in the folder
     for file_name in os.listdir(folder_path):
+        # Stop early if all combinations have the required number of images
+        if all(count == images_per_combination for count in combination_counters.values()) and len(combination_counters) == num_combinations:
+            break
+
         image_path = os.path.join(folder_path, file_name)
         
         # Open the image and apply transformations
@@ -199,24 +206,22 @@ def find_correct_and_incorrect_images(model, folder_path, target_class, vit_tech
             output = model(image_tensor)
             predicted_class = torch.argmax(output, dim=1).item()
         
-        # Check if the prediction is correct or incorrect
-        if predicted_class == target_class and correct_image is None:
-            correct_image = image_path
-        elif predicted_class != target_class and incorrect_image is None:
-            incorrect_image = image_path
+        # Record the combination
+        combination = (target_class, predicted_class)
+        
+        # Add the image if we haven't yet reached the desired count for this combination
+        if combination_counters[combination] < images_per_combination:
+            classification_combinations[combination].append(image_path)
+            combination_counters[combination] += 1
 
-        # Stop if both images are found
-        if correct_image and incorrect_image:
-            break
-
-    return correct_image, incorrect_image
+    return classification_combinations
 
 
 
 
 
-def find_suitable_images(list_models, list_dict_hyperparameters):
-    
+def find_suitable_images(list_models, list_dict_hyperparameters, images_per_combination=1):
+
     list_dict_image_tensors = []
 
     for i in tqdm(range(len(list_models)), desc="Finding suitable images", ncols=100):
@@ -231,30 +236,23 @@ def find_suitable_images(list_models, list_dict_hyperparameters):
         else:
             num_classes = 5
 
-        normal_correct, normal_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/normal", 0, vit_technique)
-        stroma_correct, stroma_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/stroma", 1, vit_technique)
-        g3_correct, g3_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g3", 2, vit_technique)
-        if num_classes == 5:
-            g4_correct, g4_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g4", 3, vit_technique)
-            g5_correct, g5_incorrect = find_correct_and_incorrect_images(model, ".scratch/data/AGGC-2022-Classification/train/g5", 4, vit_technique)
+        # Initialize a dictionary to store all classifications
+        all_classifications = defaultdict(list)
 
-        dict_image_tensors = {
-            "normal_correct": preprocess_image(normal_correct, vit_technique),
-            "normal_incorrect": preprocess_image(normal_incorrect, vit_technique),
-            "stroma_correct": preprocess_image(stroma_correct, vit_technique),
-            "stroma_incorrect": preprocess_image(stroma_incorrect, vit_technique),
-            "g3_correct": preprocess_image(g3_correct, vit_technique),
-            "g3_incorrect": preprocess_image(g3_incorrect, vit_technique)
-        }
-        if num_classes == 5:
-            dict_image_tensors.update({
-                "g4_correct": preprocess_image(g4_correct, vit_technique),
-                "g4_incorrect": preprocess_image(g4_incorrect, vit_technique),
-                "g5_correct": preprocess_image(g5_correct, vit_technique),
-                "g5_incorrect": preprocess_image(g5_incorrect, vit_technique)
-            })
-        
-        list_dict_image_tensors.append(dict_image_tensors)
+        classes = ["normal", "stroma", "g3", "g4", "g5"]
+
+        # Loop through each class
+        for target_class in range(num_classes):
+            class_folder = f".scratch/data/AGGC-2022-Classification/train/{classes[target_class]}"
+            combinations = find_all_classification_combinations(
+                model, class_folder, target_class, vit_technique, num_classes**2, images_per_combination
+            )
+            
+            # Combine results into the main dictionary
+            for key, images in combinations.items():
+                all_classifications[key].extend(preprocess_image(img, vit_technique) for img in images)
+
+        list_dict_image_tensors.append(all_classifications)
 
     return list_dict_image_tensors
 
