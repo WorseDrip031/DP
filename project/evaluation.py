@@ -220,7 +220,7 @@ def find_all_classification_combinations(model, folder_path, target_class, vit_t
 
 
 
-def find_suitable_images(list_models, list_dict_hyperparameters, images_per_combination=1):
+def find_suitable_images(list_models, list_dict_hyperparameters, images_per_combination=2):
 
     list_dict_image_tensors = []
 
@@ -245,7 +245,7 @@ def find_suitable_images(list_models, list_dict_hyperparameters, images_per_comb
         for target_class in range(num_classes):
             class_folder = f".scratch/data/AGGC-2022-Classification/train/{classes[target_class]}"
             combinations = find_all_classification_combinations(
-                model, class_folder, target_class, vit_technique, num_classes**2, images_per_combination
+                model, class_folder, target_class, vit_technique, num_classes, images_per_combination
             )
             
             # Combine results into the main dictionary
