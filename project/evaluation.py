@@ -327,50 +327,24 @@ def evaluate_all_models(list_models, list_dict_hyperparameters, list_dict_image_
         model = list_models[i]
         dict_image_tensors = list_dict_image_tensors[i]
         dict_hyperparameters = list_dict_hyperparameters[i]
-        gleason_handling = dict_hyperparameters["gleason_handling"]
         experiment_name = dict_hyperparameters["name"]
 
-        # Determine the number of classes
-        if gleason_handling == "Grouped":
-            num_classes = 3
-        else:
-            num_classes = 5
+        classes = ["normal", "stroma", "g3", "g4", "g5"]
 
-        image_name = "normal_correct"
-        evaluate_with_captum(model, dict_image_tensors[image_name], 0, experiment_name, image_name)
+        # Iterate through all combinations in the dictionary
+        for (true_class, predicted_class), image_tensors in dict_image_tensors.items():
+            # Construct a descriptive image name
+            combination_name = f"A:{classes[true_class]} - P:{classes[predicted_class]}"
 
-        image_name = "normal_incorrect"
-        evaluate_with_captum(model, dict_image_tensors[image_name], 0, experiment_name, image_name)
+            # Evaluate each image tensor in the current combination
+            for idx, image_tensor in enumerate(image_tensors):
+                evaluate_with_captum(
+                    model, image_tensor, true_class, experiment_name, f"{combination_name}_image_{idx + 1}"
+                )
 
-        image_name = "stroma_correct"
-        evaluate_with_captum(model, dict_image_tensors[image_name], 1, experiment_name, image_name)
-
-        image_name = "stroma_incorrect"
-        evaluate_with_captum(model, dict_image_tensors[image_name], 1, experiment_name, image_name)
-
-        image_name = "g3_correct"
-        evaluate_with_captum(model, dict_image_tensors[image_name], 2, experiment_name, image_name)
-
-        image_name = "g3_incorrect"
-        evaluate_with_captum(model, dict_image_tensors[image_name], 2, experiment_name, image_name)
-
-        if num_classes == 5:
-
-            image_name = "g4_correct"
-            evaluate_with_captum(model, dict_image_tensors[image_name], 3, experiment_name, image_name)
-
-            image_name = "g4_incorrect"
-            evaluate_with_captum(model, dict_image_tensors[image_name], 3, experiment_name, image_name)
-
-            image_name = "g5_correct"
-            evaluate_with_captum(model, dict_image_tensors[image_name], 4, experiment_name, image_name)
-
-            image_name = "g5_incorrect"
-            evaluate_with_captum(model, dict_image_tensors[image_name], 4, experiment_name, image_name)
 
 
         
-
 
 if __name__ == "__main__":
 
