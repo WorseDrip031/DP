@@ -220,7 +220,7 @@ def find_all_classification_combinations(model, folder_path, target_class, vit_t
 
 
 
-def find_suitable_images(list_models, list_dict_hyperparameters, images_per_combination=2):
+def find_suitable_images(list_models, list_dict_hyperparameters, images_per_combination=1):
 
     list_dict_image_tensors = []
 
@@ -334,7 +334,7 @@ def evaluate_all_models(list_models, list_dict_hyperparameters, list_dict_image_
         # Iterate through all combinations in the dictionary
         for (true_class, predicted_class), image_tensors in dict_image_tensors.items():
             # Construct a descriptive image name
-            combination_name = f"A:{classes[true_class]} - P:{classes[predicted_class]}"
+            combination_name = f"A-{classes[true_class]}_P-{classes[predicted_class]}"
 
             # Evaluate each image tensor in the current combination
             for idx, image_tensor in enumerate(image_tensors):

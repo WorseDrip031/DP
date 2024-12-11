@@ -120,6 +120,7 @@ class ViTModel(nn.Module):
     def __init__(self, num_classes, use_pretrained=True, use_frozen=True):
         super(ViTModel, self).__init__()
         self.num_classes = num_classes
+        self.use_pretrained = use_pretrained
 
         # Create model
         self.feature_extractor = timm.create_model("vit_base_patch16_224.augreg2_in21k_ft_in1k", pretrained=use_pretrained)
@@ -134,14 +135,16 @@ class ViTModel(nn.Module):
                 p.requires_grad = False
 
         # Normalization transform
-        self.norm_transform = TVF.Normalize(
-            mean=self.feature_extractor.default_cfg["mean"],
-            std=self.feature_extractor.default_cfg["std"]
-        )
+        if use_pretrained:
+            self.norm_transform = TVF.Normalize(
+                mean=self.feature_extractor.default_cfg["mean"],
+                std=self.feature_extractor.default_cfg["std"]
+            )
 
 
     def forward(self, x):
-        x = self.norm_transform(x)
+        if self.use_pretrained:
+            x = self.norm_transform(x)
         f = self.feature_extractor(x)
         f = f[:,0]
         logits = self.head(f)
