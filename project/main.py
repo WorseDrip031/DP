@@ -13,9 +13,9 @@ if __name__ == "__main__":
     p = ArgumentParser()
 
     # Experiment
-    p.add_argument("--name", "-n", type=str, default="0006 - ViT Grouped Downscale", help="Experiment name")
+    p.add_argument("--name", "-n", type=str, default="0007 - EVA02 Grouped Pretrained Crop", help="Experiment name")
     p.add_argument("--project", "-p", choices=["DP-Classification"], default="DP-Classification", help="Project name")
-    p.add_argument("--continue_from_checkpoint", "-cfc", choices=["Yes", "No"], default="Yes", help="Want to continue from last checkpoint?")
+    p.add_argument("--continue_from_checkpoint", "-cfc", choices=["Yes", "No"], default="No", help="Want to continue from last checkpoint?")
     p.add_argument("--run_id", "-rid", type=str, default="qj57dd2n", help="Wandb run ID for continuing experiment")
 
     # Hyperparameters
@@ -30,10 +30,10 @@ if __name__ == "__main__":
     p.add_argument("--gleason_handling", "-gh", choices=["Separate", "Grouped"], default="Grouped", help="How to handle gleason classes")
 
     # Model
-    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "ViT"], default="ViT", help="Model Architecture")
-    p.add_argument("--use_pretrained_model", "-upm", choices=["Yes", "No"], default="No", help="Use pretrained model?")
+    p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "ViT", "EVA02"], default="EVA02", help="Model Architecture")
+    p.add_argument("--use_pretrained_model", "-upm", choices=["Yes", "No"], default="Yes", help="Use pretrained model?")
     p.add_argument("--use_frozen_model", "-ufm", choices=["Yes", "No"], default="No", help="Use frozen model?")
-    p.add_argument("--vit_technique", "-vt", choices=["Downscale", "Crop", "QuintupleCrop"], default="Downscale", help="ViT data preparation technique")
+    p.add_argument("--vit_technique", "-vt", choices=["Downscale", "Crop", "QuintupleCrop"], default="Crop", help="ViT data preparation technique")
 
     cfg = p.parse_args()
     main(cfg)

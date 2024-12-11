@@ -7,7 +7,7 @@ from torchsummary import summary
 from argparse import Namespace
 
 from tools.datamodule import DataModule, AGGC2022ClassificationDatamodule
-from tools.model import SimpleConvModel, PretrainedConvModel, ResNet18Model, ResNet50Model, ViTModel
+from tools.model import SimpleConvModel, PretrainedConvModel, ResNet18Model, ResNet50Model, ViTModel, EVA02Model
 from tools.trainer import Trainer
 import tools.logging as L
 
@@ -240,6 +240,8 @@ class AGGCClassificationExperiment:
             model = ResNet50Model(num_classes, use_pretrained)
         elif cfg.model_architecture == "ViT":
             model = ViTModel(num_classes, use_pretrained, use_frozen)
+        elif cfg.model_architecture == "EVA02":
+            model = EVA02Model(num_classes, use_pretrained, use_frozen)
         else:
             raise Exception(f"Invalid architecture: {cfg.model_architecture}")
         

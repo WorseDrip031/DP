@@ -10,7 +10,7 @@ from captum.attr import IntegratedGradients, Saliency, visualization, Occlusion
 from tqdm import tqdm
 from collections import defaultdict
 
-from tools.model import ResNet18Model, ResNet50Model, ViTModel
+from tools.model import ResNet18Model, ResNet50Model, ViTModel, EVA02Model
 
 import matplotlib
 matplotlib.use('Agg')
@@ -136,6 +136,8 @@ def load_models(list_state_dict_paths, list_dict_hyperparameters):
             model = ResNet50Model(num_classes, use_pretrained)
         elif model_architecture == "ViT":
             model = ViTModel(num_classes, use_pretrained, use_frozen)
+        elif model_architecture == "EVA02":
+            model = EVA02Model(num_classes, use_pretrained, use_frozen)
         else:
             raise Exception(f"Invalid architecture: {model_architecture}")
 
@@ -153,13 +155,19 @@ def load_models(list_state_dict_paths, list_dict_hyperparameters):
 
 
 
-def preprocess_image(image_path, vit_technique):
+def preprocess_image(image_path, vit_technique, model_architecture):
 
     if vit_technique == "Downscale":
-        transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor()
-        ])
+        if model_architecture == "EVA02":
+            transform = transforms.Compose([
+                transforms.Resize((448, 448)),
+                transforms.ToTensor()
+            ])
+        else:
+            transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor()
+            ])
     else:
         transform = transforms.Compose([
             transforms.ToTensor()
@@ -168,12 +176,15 @@ def preprocess_image(image_path, vit_technique):
     image = datasets.folder.default_loader(image_path)
 
     if vit_technique == "Crop" or vit_technique == "QuintupleCrop":
-        # Crop the image to the center (224x224)
+        crop_size = 224
+        if model_architecture == "EVA02":
+            crop_size = 448
+        # Crop the image to the center
         width, height = image.size
-        left = (width - 224) // 2
-        top = (height - 224) // 2
-        right = (width + 224) // 2
-        bottom = (height + 224) // 2
+        left = (width - crop_size) // 2
+        top = (height - crop_size) // 2
+        right = (width + crop_size) // 2
+        bottom = (height + crop_size) // 2
         image = image.crop((left, top, right, bottom))
         
     image_tensor = transform(image).unsqueeze(0)
@@ -183,7 +194,7 @@ def preprocess_image(image_path, vit_technique):
 
 
 
-def find_all_classification_combinations(model, folder_path, target_class, vit_technique, num_combinations, images_per_combination):
+def find_all_classification_combinations(model, folder_path, target_class, vit_technique, model_architecture, num_combinations, images_per_combination):
 
     classification_combinations = defaultdict(list)
     
@@ -199,7 +210,7 @@ def find_all_classification_combinations(model, folder_path, target_class, vit_t
         image_path = os.path.join(folder_path, file_name)
         
         # Open the image and apply transformations
-        image_tensor = preprocess_image(image_path, vit_technique)
+        image_tensor = preprocess_image(image_path, vit_technique, model_architecture)
         
         # Make a prediction using the model
         with torch.no_grad():
@@ -229,6 +240,7 @@ def find_suitable_images(list_models, list_dict_hyperparameters, images_per_comb
         dict_hyperparameters = list_dict_hyperparameters[i]
         gleason_handling = dict_hyperparameters["gleason_handling"]
         vit_technique = dict_hyperparameters["vit_technique"]
+        model_architecture = dict_hyperparameters["model_architecture"]
 
         # Determine the number of classes
         if gleason_handling == "Grouped":
@@ -245,12 +257,12 @@ def find_suitable_images(list_models, list_dict_hyperparameters, images_per_comb
         for target_class in range(num_classes):
             class_folder = f".scratch/data/AGGC-2022-Classification/train/{classes[target_class]}"
             combinations = find_all_classification_combinations(
-                model, class_folder, target_class, vit_technique, num_classes, images_per_combination
+                model, class_folder, target_class, vit_technique, model_architecture, num_classes, images_per_combination
             )
             
             # Combine results into the main dictionary
             for key, images in combinations.items():
-                all_classifications[key].extend(preprocess_image(img, vit_technique) for img in images)
+                all_classifications[key].extend(preprocess_image(img, vit_technique, model_architecture) for img in images)
 
         list_dict_image_tensors.append(all_classifications)
 

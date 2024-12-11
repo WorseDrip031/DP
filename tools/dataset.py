@@ -589,20 +589,24 @@ class AGGC2022ClassificationDataset(Dataset):
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "Crop":
-            # Define crop dimensions for a 224x224 patch from the center
+        if (self.cfg.model_architecture == "ViT" or self.cfg.model_architecture == "EVA02") and self.cfg.vit_technique == "Crop":
+            # Define crop dimensions for a patch from the center
             height, width, _ = image.shape
             crop_size = 224
+            if self.cfg.model_architecture == "EVA02":
+                crop_size = 448
             start_x = (width - crop_size) // 2  # Starting x-coordinate for center crop
             start_y = (height - crop_size) // 2  # Starting y-coordinate for center crop
             image = image[start_y:start_y + crop_size, start_x:start_x + crop_size]
 
-        if self.cfg.model_architecture == "ViT" and self.cfg.vit_technique == "QuintupleCrop":
+        if (self.cfg.model_architecture == "ViT" or self.cfg.model_architecture == "EVA02") and self.cfg.vit_technique == "QuintupleCrop":
             batch_size = len(self.files) / 5
             order_of_batch = index // batch_size
 
             height, width, _ = image.shape
             crop_size = 224
+            if self.cfg.model_architecture == "EVA02":
+                crop_size = 448
 
             # Determine the starting x and y coordinates for cropping based on order_of_batch
             if order_of_batch == 0:  # Center crop

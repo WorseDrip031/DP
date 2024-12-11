@@ -46,11 +46,17 @@ class AGGC2022ClassificationDatamodule:
 
         self.augmentation_transform = None
 
-        if cfg.model_architecture == "ViT" and cfg.vit_technique == "Downscale":
-            self.input_transform = TF.Compose([
-                NumpyToTensor(),
-                TF.Resize(size=(224,224))
-            ])
+        if (self.cfg.model_architecture == "ViT" or self.cfg.model_architecture == "EVA02") and cfg.vit_technique == "Downscale":
+            if self.cfg.model_architecture == "EVA02":
+                self.input_transform = TF.Compose([
+                    NumpyToTensor(),
+                    TF.Resize(size=(448,448))
+                ])
+            else:
+                self.input_transform = TF.Compose([
+                    NumpyToTensor(),
+                    TF.Resize(size=(224,224))
+                ])
         else:
             self.input_transform = TF.Compose([
                 NumpyToTensor()
