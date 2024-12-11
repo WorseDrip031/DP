@@ -246,17 +246,24 @@ class AGGCClassificationExperiment:
             raise Exception(f"Invalid architecture: {cfg.model_architecture}")
         
         print("Creating model: ")
-        if cfg.model_architecture != "ViT":
+        if cfg.model_architecture == "ViT":
             summary(
                 model,
-                input_size=(num_classes,512,512),
+                input_size=(num_classes,224,224),
+                batch_size=1,
+                device="cpu"
+            )
+        elif cfg.model_architecture == "EVA02":
+            summary(
+                model,
+                input_size=(num_classes,448,448),
                 batch_size=1,
                 device="cpu"
             )
         else:
             summary(
                 model,
-                input_size=(num_classes,224,224),
+                input_size=(num_classes,512,512),
                 batch_size=1,
                 device="cpu"
             )

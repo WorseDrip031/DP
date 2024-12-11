@@ -19,7 +19,7 @@ if __name__ == "__main__":
     p.add_argument("--run_id", "-rid", type=str, default="qj57dd2n", help="Wandb run ID for continuing experiment")
 
     # Hyperparameters
-    p.add_argument("--batch_size", "-bs", type=int, default=64, help="Batch size")
+    p.add_argument("--batch_size", "-bs", type=int, default=16, help="Batch size")
     p.add_argument("--num_workers", "-nw", type=int, default=2, help="Number of dataloader workers")
     p.add_argument("--max_epochs", "-e", type=int, default=100, help="Number of epochs to train")
     p.add_argument("--learning_rate", "-lr", type=float, default=0.005, help="Optimizer learning rate")
