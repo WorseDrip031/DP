@@ -3,14 +3,20 @@ import re
 import yaml
 import torch
 import numpy as np
+import torch.nn as nn
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 from captum.attr import IntegratedGradients, Saliency, visualization, Occlusion
 from tqdm import tqdm
 from collections import defaultdict
+from argparse import ArgumentParser
+from torchmetrics import Accuracy
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
 from tools.model import ResNet18Model, ResNet50Model, ViTModel, EVA02Model
+from tools.datamodule import AGGC2022ClassificationDatamodule
+from tools.statistics import Statistics
 
 import matplotlib
 matplotlib.use('Agg')
@@ -79,6 +85,9 @@ def get_all_hyperparameters(base_path):
                     use_frozen_model = config.get("use_frozen_model", "N/A")
                     name = config.get("name", "N/A")
                     vit_technique = config.get("vit_technique", "N/A")
+                    batch_size = config.get("batch_size", "N/A")
+                    num_workers = config.get("num_workers", "N/A")
+                    use_augmentations = config.get("use_augmentations", "N/A")
 
                     # Create a dictionary with the retrieved variables
                     hyperparameters = {
@@ -87,7 +96,10 @@ def get_all_hyperparameters(base_path):
                         "use_pretrained_model": use_pretrained_model,
                         "use_frozen_model": use_frozen_model,
                         "name": name,
-                        "vit_technique": vit_technique
+                        "vit_technique": vit_technique,
+                        "batch_size": batch_size,
+                        "num_workers": num_workers,
+                        "use_augmentations": use_augmentations
                     }
 
                     # Add the dictionary to the list
@@ -358,16 +370,112 @@ def evaluate_all_models(list_models, list_dict_hyperparameters, list_dict_image_
 
         
 
+def test_all_models(list_models, list_dict_hyperparameters):
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    loss = nn.CrossEntropyLoss()
+
+    for i in range(len(list_models)):
+
+        model = list_models[i]
+        model = model.to(device)
+        dict_hyperparameters = list_dict_hyperparameters[i]
+        experiment_name = dict_hyperparameters["name"]
+        acc = Accuracy("multiclass", num_classes=model.num_classes)
+
+        p = ArgumentParser()
+        p.add_argument("--batch_size", "-bs", type=int, default=dict_hyperparameters["batch_size"], help="Batch size")
+        p.add_argument("--num_workers", "-nw", type=int, default=dict_hyperparameters["num_workers"], help="Number of dataloader workers")
+        p.add_argument("--model_architecture", "-ma", choices=["ResNet18", "ResNet50", "ViT", "EVA02"], default=dict_hyperparameters["model_architecture"], help="Model Architecture")
+        p.add_argument("--vit_technique", "-vt", choices=["Downscale", "Crop", "QuintupleCrop"], default=dict_hyperparameters["vit_technique"], help="ViT data preparation technique")
+        p.add_argument("--use_augmentations", "-ua", choices=["Yes", "No"], default=dict_hyperparameters["use_augmentations"], help="Use augmentations?")
+        p.add_argument("--gleason_handling", "-gh", choices=["Separate", "Grouped"], default=dict_hyperparameters["gleason_handling"], help="How to handle gleason classes")
+        cfg = p.parse_args()
+
+        datamodule = AGGC2022ClassificationDatamodule(cfg)
+        dataloader_test = datamodule.dataloader_test
+        stats = Statistics()
+
+        # Lists to store true and predicted labels for the confusion matrix
+        all_true_labels = []
+        all_pred_labels = []
+
+        model.eval()
+        with tqdm(dataloader_test, desc=experiment_name) as progress:
+            for x, y in progress:
+                
+                x = x.to(device)
+                y = y.to(device)
+
+                y_hat_logits = model(x)
+                l = loss(y_hat_logits, y)
+
+                # Convert logits to predictions
+                preds = torch.argmax(torch.softmax(y_hat_logits, dim=1), dim=1)
+
+                # Store true labels and predictions for confusion matrix
+                all_true_labels.append(y.cpu().numpy())
+                all_pred_labels.append(preds.cpu().numpy())
+
+                a = acc(
+                    torch.softmax(y_hat_logits, dim=1).cpu(),      # Predictions
+                    torch.argmax(y, dim=1).cpu()                   # Classes
+                )
+
+                stats.step("loss_val", l.item())
+                stats.step("acc_val", a.item())
+                progress.set_postfix(stats.get())
+
+        # Flatten the collected true and predicted labels
+        all_true_labels = np.concatenate(all_true_labels, axis=0)
+        all_pred_labels = np.concatenate(all_pred_labels, axis=0)
+
+        # Compute confusion matrix
+        cm = confusion_matrix(all_true_labels, all_pred_labels)
+        print(f"Confusion Matrix for {experiment_name}:")
+        print(cm)
+
+        # Calculate accuracy from the confusion matrix
+        accuracy_from_cm = np.trace(cm) / np.sum(cm)
+        print(f"Accuracy from Confusion Matrix for {experiment_name}: {accuracy_from_cm:.4f}")
+
+        # Calculate precision, recall, and F1-score
+        accuracy = accuracy_score(all_true_labels, all_pred_labels, normalize=True)
+        precision = precision_score(all_true_labels, all_pred_labels, average='weighted')
+        recall = recall_score(all_true_labels, all_pred_labels, average='weighted')
+        f1 = f1_score(all_true_labels, all_pred_labels, average='weighted')
+
+        print(f"Accuracy for {experiment_name}: {accuracy:.4f}")
+        print(f"Precision for {experiment_name}: {precision:.4f}")
+        print(f"Recall for {experiment_name}: {recall:.4f}")
+        print(f"F1-Score for {experiment_name}: {f1:.4f}")
+
+
+        
+
+
+EVALUATE_EXPLAINABILITY = False
+EVALUATE_METRICS = True
+
 if __name__ == "__main__":
 
-    # Load all of the trained models
-    list_state_dict_paths = find_highest_checkpoint(".scratch/experiments")
-    list_dict_hyperparameters = get_all_hyperparameters(".scratch/experiments")
-    list_models = load_models(list_state_dict_paths, list_dict_hyperparameters)
-    
-    # Load and preprocess images
-    list_dict_image_tensors = find_suitable_images(list_models, list_dict_hyperparameters)
+    if EVALUATE_EXPLAINABILITY or EVALUATE_METRICS:
 
-    # Evaluate the models with captum
-    evaluate_all_models(list_models, list_dict_hyperparameters, list_dict_image_tensors)
+        # Load all of the trained models
+        list_state_dict_paths = find_highest_checkpoint(".scratch/experiments")
+        list_dict_hyperparameters = get_all_hyperparameters(".scratch/experiments")
+        list_models = load_models(list_state_dict_paths, list_dict_hyperparameters)
+
+    if EVALUATE_EXPLAINABILITY:
+    
+        # Load and preprocess images
+        list_dict_image_tensors = find_suitable_images(list_models, list_dict_hyperparameters)
+
+        # Evaluate the models with captum
+        evaluate_all_models(list_models, list_dict_hyperparameters, list_dict_image_tensors)
+
+    if EVALUATE_METRICS:
+
+        # Evaluate the models on testing dataset
+        test_all_models(list_models, list_dict_hyperparameters)
     
