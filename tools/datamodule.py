@@ -47,7 +47,7 @@ class AGGC2022ClassificationDatamodule:
         self.augmentation_transform = None
 
         if (cfg.model_architecture == "ViT" or cfg.model_architecture == "EVA02") and cfg.vit_technique == "Downscale":
-            if self.cfg.model_architecture == "EVA02":
+            if cfg.model_architecture == "EVA02":
                 self.input_transform = TF.Compose([
                     NumpyToTensor(),
                     TF.Resize(size=(448,448))

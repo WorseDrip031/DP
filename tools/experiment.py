@@ -261,12 +261,15 @@ class AGGCClassificationExperiment:
                 device="cpu"
             )
         else:
+            pass
+            """
             summary(
                 model,
                 input_size=(num_classes,512,512),
                 batch_size=1,
                 device="cpu"
             )
+            """
         return model
     
 
