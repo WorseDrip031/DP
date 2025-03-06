@@ -2,18 +2,26 @@ import os
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
+from PIL import Image
+from pathlib import Path
+from typing import List, Tuple
 
 
-def visualize_blocks_to_process(folder, patch_size, overlap_percentage):
+def visualize_regions(folder:Path,
+                      patch_size:int,
+                      overlap_percentage:float
+                      ) -> Image.Image:
     
     print("Processing block visualization analysis started...")
-    if (folder / "blocks_to_process.png").exists():
+
+    if (folder / "regions_to_process.png").exists():
+        wsi_image = Image.open(folder / "regions_to_process.png")
         print("Processing block visualization complete...")
-        return
+        return wsi_image
 
     # Step 1: Determine WSI Size
     max_x, max_y = 0, 0
-    patches = []
+    patches: List[Tuple[int, int, str, str]] = []
 
     for filename in os.listdir(folder / "patches"):
         if filename.endswith(".png"):
@@ -58,8 +66,9 @@ def visualize_blocks_to_process(folder, patch_size, overlap_percentage):
                 red_mask.paste(red_patch, (j*overlap_size, i*overlap_size), red_patch)
 
     print("Processing block visualization saving...")
+
     wsi_image = wsi_image.convert('RGBA')
     wsi_image = Image.alpha_composite(wsi_image, red_mask)
+    wsi_image.save((folder / "regions_to_process.png"))
 
-    # Save final reconstructed image
-    wsi_image.save((folder / "blocks_to_process.png"))
+    return wsi_image

@@ -1,9 +1,14 @@
 import yaml
 import torch
+import torch.nn as nn
+from pathlib import Path
 
-from tools.model import ResNet18Model, ResNet50Model, ViTModel, EVA02Model
+from tools.training import ResNet18Model, ViTModel, EVA02Model
 
-def load_hyperparameters(model_config_path):
+
+def load_hyperparameters(model_config_path:Path
+                         ) -> dict[str, str]:
+    
     with open(model_config_path, 'r') as file:
         config = yaml.safe_load(file)
 
@@ -23,9 +28,14 @@ def load_hyperparameters(model_config_path):
 
         return hyperparameters
 
-def load_model(model_config_path, model_checkpoint_path):
-    hyperparameters = load_hyperparameters(model_config_path)
+
+def load_model(model_config_path:Path, 
+               model_checkpoint_path:Path
+               ) -> nn.Module:
     
+    print("Loading model hyperparameters...")
+
+    hyperparameters = load_hyperparameters(model_config_path)
     gleason_handling = hyperparameters["gleason_handling"]
     model_architecture = hyperparameters["model_architecture"]
     use_pretrained_model = hyperparameters["use_pretrained_model"]
@@ -47,11 +57,11 @@ def load_model(model_config_path, model_checkpoint_path):
     if use_frozen_model == "No":
         use_frozen = False
 
+    print("Loading model...")
+
     # Determine model architecture
     if model_architecture == "ResNet18":
         model = ResNet18Model(num_classes, use_pretrained)
-    elif model_architecture == "ResNet50":
-        model = ResNet50Model(num_classes, use_pretrained)
     elif model_architecture == "ViT":
         model = ViTModel(num_classes, use_pretrained, use_frozen)
     elif model_architecture == "EVA02":
@@ -59,7 +69,7 @@ def load_model(model_config_path, model_checkpoint_path):
     else:
         raise Exception(f"Invalid architecture: {model_architecture}")
     
-    checkpoint = torch.load(
+    checkpoint = torch.load( # type: ignore
         model_checkpoint_path,
         map_location=torch.device("cpu")
     )

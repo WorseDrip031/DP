@@ -14,9 +14,9 @@ from argparse import ArgumentParser
 from torchmetrics import Accuracy
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
-from tools.model import ResNet18Model, ResNet50Model, ViTModel, EVA02Model
-from tools.datamodule import AGGC2022ClassificationDatamodule
-from tools.statistics import Statistics
+from training_tools.model import ResNet18Model, ResNet50Model, ViTModel, EVA02Model
+from training_tools.datamodule import AGGC2022ClassificationDatamodule
+from training_tools.statistics import Statistics
 
 import matplotlib
 matplotlib.use('Agg')

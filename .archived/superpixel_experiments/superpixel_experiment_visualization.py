@@ -46,7 +46,7 @@ def create_plots(input_folder_path, plots_folder_path):
 
 
 ##### Main #####
-folder_path = Path("superpixel_experiments/output")
+folder_path = Path(".archived/superpixel_experiments/output")
 plots_folder_path = folder_path / "plots"
 plots_folder_path.mkdir(parents=True, exist_ok=True)
 for sub_folder in tqdm(folder_path.iterdir(), desc="Processing subfolders", unit="folder"):

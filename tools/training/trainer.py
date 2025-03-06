@@ -4,8 +4,8 @@ import torch.nn as nn
 from tqdm import tqdm
 from torchmetrics import Accuracy
 
-from tools.statistics import Statistics
-from tools.logging import LogCompose
+from .statistics import Statistics
+from .logging import LogCompose
 
 class Trainer:
     def __init__(self, cfg, model):

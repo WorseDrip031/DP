@@ -164,9 +164,9 @@ cython_debug/
 .scratch
 wandb
 
-inference/output/
+
 inference/patching/temp
 
-superpixel_experiments/output
-superpixel_experiments/input
-superpixel_experiments/temp
+.archived/inference-old/output/
+.archived/superpixel_experiments/output
+.archived/superpixel_experiments/input

@@ -2,10 +2,17 @@ import numpy as np
 import json
 import os
 from tqdm import tqdm
+from PIL import Image
+from pathlib import Path
 
 
-def create_and_analyse_patches(wsi, segmented_wsi, scale_factor, patch_size,
-                               overlap_percentage, tissue_coverage, patch_folder):
+def create_and_analyse_patches(wsi:Image.Image,
+                               segmented_wsi:Image.Image,
+                               scale_factor:float,
+                               patch_size:int,
+                               overlap_percentage:float,
+                               tissue_coverage:float,
+                               patch_folder:Path):
     
     print("Patch creation analysis started...")
 
@@ -38,7 +45,8 @@ def create_and_analyse_patches(wsi, segmented_wsi, scale_factor, patch_size,
             y2 = int((y+patch_size) * scale_factor)
 
             # Analyse the segmentation region
-            segmented_region = segmented_wsi[y1:y2, x1:x2]
+            segmented_wsi_np = np.array(segmented_wsi)
+            segmented_region = segmented_wsi_np[y1:y2, x1:x2]
             tissue_pixels = np.sum(segmented_region == 255)
             crop_height, crop_width = segmented_region.shape
             total_pixels = crop_height * crop_width

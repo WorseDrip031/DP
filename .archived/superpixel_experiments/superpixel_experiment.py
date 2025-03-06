@@ -48,7 +48,7 @@ def calculate_tissue_percentage(wsi_file_path, output_directory_path, scale, sig
 
 
 ##### Main #####
-input_folder_path = Path("superpixel_experiments/input")
+input_folder_path = Path(".archived/superpixel_experiments/input")
 files = sorted(list(input_folder_path.rglob("*.png")))
 
 scales = [10, 50, 100, 500, 1000]
@@ -56,7 +56,7 @@ sigmas = [0.1, 0.25, 0.5, 0.75, 0.9]
 min_sizes = [10, 50, 100, 500, 1000]
 
 for file in tqdm(files, desc="Processing Files", unit="file"):
-    directory_path = Path("superpixel_experiments/output") / file.stem
+    directory_path = Path(".archived/superpixel_experiments/output") / file.stem
     directory_path.mkdir(parents=True, exist_ok=True)
 
     for scale in tqdm(scales, desc="Scale", unit="scale", leave=False):

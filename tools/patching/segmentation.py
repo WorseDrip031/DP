@@ -1,4 +1,6 @@
 import numpy as np
+from PIL import Image
+from pathlib import Path
 from skimage.color import rgb2hsv
 from skimage.filters import median
 from skimage.morphology import disk
@@ -7,7 +9,9 @@ from skimage.util import img_as_ubyte
 from skimage.segmentation import felzenszwalb
 from skimage.io import imsave, imread
 
-def segment_tissue(dowsnampled_wsi, segmented_wsi_path):
+def segment_tissue(dowsnampled_wsi:Image.Image,
+                   segmented_wsi_path:Path
+                   ) -> Image.Image:
     
     print("Tissue segmentation analysis started...")
 
