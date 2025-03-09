@@ -1,66 +1,34 @@
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
-from tools.patching import preprocess_patches
+from tools.classification import analyse_patches
 
 DATASET_BASEPATH = Path(".scratch/data/AGGC-2022-Unprepared")
 MODELS_BASEPATH = Path(".scratch/models")
 INFERENCE_BASEPATH = Path(".scratch/inference")
 
-########################################
-#  Stage 1: Pre-processing - Patching  #
-########################################
+###################################
+#  Stage 2: Patch Classification  #
+###################################
 
-patch_size = 512                                                        # Size of the created patches
-overlap_percentage = 0.5                                                # Percentage of overlap between patches
-tissue_coverage = 0.5                                                   # Minimal tissue coverage of patch for processing
+model_paths:List[Tuple[str, Path, Path]] = []
 
-wsi_file_paths:List[Path] = []
+model_name = "0001 - Pretrained ResNet18 Grouped"
+model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
+model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0002.pt"
+model_paths.append((model_name, model_config_path, model_checkpoint_path))
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_001.tiff"
-wsi_file_paths.append(wsi_file_path)
+model_name = "0005 - Pretrained Frozen ViT Grouped Downscale"
+model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
+model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0001.pt"
+model_paths.append((model_name, model_config_path, model_checkpoint_path))
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_002.tiff"
-wsi_file_paths.append(wsi_file_path)
+model_name = "0007 - EVA02 Grouped Pretrained Frozne Downscale"
+model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
+model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0005.pt"
+model_paths.append((model_name, model_config_path, model_checkpoint_path))
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_003.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_004.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_005.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_006.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_007.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_008.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_009.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_010.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_011.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_012.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_013.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_014.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_015.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-for wsi_path in wsi_file_paths:
-    inference_folder = preprocess_patches(INFERENCE_BASEPATH, wsi_path, patch_size, overlap_percentage, tissue_coverage)
+for inference_folder in INFERENCE_BASEPATH.iterdir():
+    if inference_folder.is_dir():
+        for m_paths in model_paths:
+            analyse_patches(inference_folder, m_paths[0], m_paths[1], m_paths[2])

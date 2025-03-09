@@ -4,8 +4,8 @@ from .model_loader import load_model
 from .classifyer import classify_patches
 from .visualize import visualize_regions
 
-def analyse_patches(model_name:str, 
-                    inference_folder:Path,
+def analyse_patches(inference_folder:Path,
+                    model_name:str,
                     model_config_path:Path,
                     model_checkpoint_path:Path):
     
@@ -13,9 +13,10 @@ def analyse_patches(model_name:str,
     model = load_model(model_config_path, model_checkpoint_path)
 
     # Step 2: Calssify patches into classes
-    classified_patches_folder = patch_folder.parent / f"classified_patches-{model_name}"
+    classified_patches_folder = inference_folder / "classified_patches" / model_name
     classified_patches_folder.mkdir(parents=True, exist_ok=True)
-    classify_patches(model, patch_folder, classified_patches_folder)
+    patches_folder = inference_folder / "patches"
+    classify_patches(model, patches_folder, classified_patches_folder)
 
     # Visualize regions
-    visualize_regions(classified_patches_folder, 512, 0.5, ["all", "normal", "stroma", "gleason"])
+    # visualize_regions(classified_patches_folder, 512, 0.5, ["all", "normal", "stroma", "gleason"])

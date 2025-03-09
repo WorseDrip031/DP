@@ -4,9 +4,14 @@ import shutil
 from tqdm import tqdm
 import torchvision.transforms as TF
 from typing import Callable
+import torch.nn as nn
+from pathlib import Path
 import numpy as np
 import torch
 from PIL import Image
+
+from tools.training import ResNet18Model, ViTModel, EVA02Model
+
 
 class NumpyToTensor(Callable):
     def __call__(self, x):
@@ -15,15 +20,29 @@ class NumpyToTensor(Callable):
         return x.float()   
 
 
-def classify_patches(model, original_folder, new_folder):
+def classify_patches(model:nn.Module,
+                     original_folder:Path,
+                     new_folder:Path):
 
     if any(os.scandir(new_folder)):
         print("Patch analysis complete...")
         return
 
-    image_transform = TF.Compose([
-        NumpyToTensor()
-    ])
+    if isinstance(model, ResNet18Model):
+        image_transform = TF.Compose([
+            NumpyToTensor()
+        ])
+    elif isinstance(model, ViTModel):
+        image_transform = TF.Compose([
+            NumpyToTensor(),
+            TF.Resize(size=(224,224))
+        ])
+    elif isinstance(model, EVA02Model):
+        image_transform = TF.Compose([
+            NumpyToTensor(),
+            TF.Resize(size=(448,448))
+        ])
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     model.eval()
