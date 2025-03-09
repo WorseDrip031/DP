@@ -20,61 +20,46 @@ wsi_file_paths:List[Path] = []
 wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_001.tiff"
 wsi_file_paths.append(wsi_file_path)
 
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_002.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_003.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_004.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_005.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_006.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_007.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_008.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_009.tiff"
+wsi_file_paths.append(wsi_file_path)
+
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_010.tiff"
+wsi_file_paths.append(wsi_file_path)
+
 wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_011.tiff"
 wsi_file_paths.append(wsi_file_path)
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_022.tiff"
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_012.tiff"
 wsi_file_paths.append(wsi_file_path)
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_033.tiff"
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_013.tiff"
 wsi_file_paths.append(wsi_file_path)
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_044.tiff"
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_014.tiff"
 wsi_file_paths.append(wsi_file_path)
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_055.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_066.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_071.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_075.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_080.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_085.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "val" / "Subset1_Val_002.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "val" / "Subset1_Val_008.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "val" / "Subset1_Val_012.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "val" / "Subset1_Val_018.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_005.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_015.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_025.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_035.tiff"
-wsi_file_paths.append(wsi_file_path)
-
-wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_045.tiff"
+wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_015.tiff"
 wsi_file_paths.append(wsi_file_path)
 
 for wsi_path in wsi_file_paths:

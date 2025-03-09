@@ -34,8 +34,8 @@ def preprocess_patches(base_inference_folder: Path,
                                overlap_percentage, tissue_coverage, patch_folder)
     
     # Step 5: Visualize regions for further processing + create downsampled version
-    regions_image = visualize_regions(inference_folder, patch_size, overlap_percentage)
-    downsampled_regions_path = inference_folder / "regions_to_process_downsampled.png"
-    downsample_image(regions_image, downsampled_regions_path, save_scale_factor=False)
+    #regions_image = visualize_regions(inference_folder, patch_size, overlap_percentage)
+    #downsampled_regions_path = inference_folder / "regions_to_process_downsampled.png"
+    #downsample_image(regions_image, downsampled_regions_path, save_scale_factor=False)
 
     return inference_folder
