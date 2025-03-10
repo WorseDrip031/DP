@@ -54,13 +54,19 @@ def visualize_single_mode(mode:str,
 
     max_value = np.max(regions) + 1
     normalized_regions = (regions / max_value * 255).astype(np.uint8)
-    mask = Image.new("RGBA", (visual_width, visual_height), (0, 0, 0, 0))
+
+    mask_height = len(normalized_regions)*downsampled_overlap_size
+    mask_width = len(normalized_regions[0])*downsampled_overlap_size
+
+    mask = Image.new("RGBA", (mask_width, mask_height), (0, 0, 0, 0))
 
     for i in tqdm(range(len(normalized_regions)), desc=f"Generating {mode} mask"):
         for j in range(len(normalized_regions[i])):
             if normalized_regions[i, j] > 0:
                 green_patch = Image.new("RGBA", (downsampled_overlap_size, downsampled_overlap_size), (0, 255, 0, normalized_regions[i][j]))
                 mask.paste(green_patch, (j*downsampled_overlap_size, i*downsampled_overlap_size), green_patch)
+
+    mask.resize((visual_width, visual_height), resample=Image.LANCZOS)
 
     image = Image.alpha_composite(downsampled_wsi, mask)
     image.save((output_folder / f"{mode}.png"))
