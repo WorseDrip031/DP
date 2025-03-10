@@ -4,14 +4,14 @@ from tools.patching import preprocess_patches
 from tools.classification import analyse_patches
 
 DATASET_BASEPATH = Path(".scratch/data/AGGC-2022-Unprepared")
-MODELS_BASEPATH = Path(".scratch/models")
+MODELS_BASEPATH = Path(".scratch/experiments")
 INFERENCE_BASEPATH = Path(".scratch/inference")
 
 ########################################
 #  Stage 1: Pre-processing - Patching  #
 ########################################
 
-wsi_file_path = DATASET_BASEPATH / "train" / "Subset1_Train_071.tiff"   # Path to the WSI to be analysed
+wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_015.tiff"     # Path to the WSI to be analysed
 patch_size = 512                                                        # Size of the created patches
 overlap_percentage = 0.5                                                # Percentage of overlap between patches
 tissue_coverage = 0.5                                                   # Minimal tissue coverage of patch for processing

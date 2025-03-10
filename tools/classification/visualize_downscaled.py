@@ -59,7 +59,7 @@ def visualize_single_mode(mode:str,
     for i in tqdm(range(len(normalized_regions)), desc=f"Generating {mode} mask"):
         for j in range(len(normalized_regions[i])):
             if normalized_regions[i, j] > 0:
-                green_patch = Image.new("RGBA", (downsampled_overlap_size, downsampled_overlap_size), (0, 255, 0, regions[i][j]))
+                green_patch = Image.new("RGBA", (downsampled_overlap_size, downsampled_overlap_size), (0, 255, 0, normalized_regions[i][j]))
                 mask.paste(green_patch, (j*downsampled_overlap_size, i*downsampled_overlap_size), green_patch)
 
     image = Image.alpha_composite(downsampled_wsi, mask)

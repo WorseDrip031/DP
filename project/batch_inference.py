@@ -4,7 +4,7 @@ from typing import List, Tuple
 from tools.classification import analyse_patches
 
 DATASET_BASEPATH = Path(".scratch/data/AGGC-2022-Unprepared")
-MODELS_BASEPATH = Path(".scratch/models")
+MODELS_BASEPATH = Path(".scratch/experiments")
 INFERENCE_BASEPATH = Path(".scratch/inference")
 
 ###################################

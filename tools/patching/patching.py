@@ -18,13 +18,14 @@ def preprocess_patches(base_inference_folder: Path,
     wsi = Image.open(wsi_file_path)
     inference_folder = base_inference_folder / f"{wsi_file_path.stem}-{patch_size}-{overlap_percentage}-{tissue_coverage}"
     inference_folder.mkdir(parents=True, exist_ok=True)
+    visualizations_folder = inference_folder / "visualizations"
 
     # Step 2: Downsample the WSI for faster segmentation
-    downsampled_wsi_path = inference_folder / f"downsampled.png"
+    downsampled_wsi_path = visualizations_folder / f"downsampled.png"
     dowsnampled_wsi, scale_factor = downsample_image(wsi, downsampled_wsi_path)
 
     # Step 3: Segment the tissue on the downsampled image
-    segmented_wsi_path = inference_folder / f"segmented.png"
+    segmented_wsi_path = visualizations_folder / f"segmented.png"
     segmented_wsi = segment_tissue(dowsnampled_wsi, segmented_wsi_path)
 
     # Step 4: Create patches and determine, if further processing is required
