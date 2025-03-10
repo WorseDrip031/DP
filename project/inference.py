@@ -11,7 +11,7 @@ INFERENCE_BASEPATH = Path(".scratch/inference")
 #  Stage 1: Pre-processing - Patching  #
 ########################################
 
-wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_015.tiff"     # Path to the WSI to be analysed
+wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_025.tiff"     # Path to the WSI to be analysed
 patch_size = 512                                                        # Size of the created patches
 overlap_percentage = 0.5                                                # Percentage of overlap between patches
 tissue_coverage = 0.5                                                   # Minimal tissue coverage of patch for processing

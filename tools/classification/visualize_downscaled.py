@@ -66,7 +66,7 @@ def visualize_single_mode(mode:str,
                 green_patch = Image.new("RGBA", (downsampled_overlap_size, downsampled_overlap_size), (0, 255, 0, normalized_regions[i][j]))
                 mask.paste(green_patch, (j*downsampled_overlap_size, i*downsampled_overlap_size), green_patch)
 
-    mask.resize((visual_width, visual_height), resample=Image.LANCZOS)
+    mask = mask.resize((visual_width, visual_height), resample=Image.LANCZOS)
 
     image = Image.alpha_composite(downsampled_wsi, mask)
     image.save((output_folder / f"{mode}.png"))
