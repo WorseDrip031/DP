@@ -2,7 +2,7 @@ from pathlib import Path
 
 from .model_loader import load_model
 from .classifyer import classify_patches
-from .visualize import visualize_regions
+from .visualize_downscaled import visualize_regions_downsampled
 
 def analyse_patches(inference_folder:Path,
                     model_name:str,
@@ -19,4 +19,5 @@ def analyse_patches(inference_folder:Path,
     classify_patches(model, patches_folder, classified_patches_folder)
 
     # Visualize regions
-    # visualize_regions(classified_patches_folder, 512, 0.5, ["all", "normal", "stroma", "gleason"])
+    modes = ["normal", "stroma", "gleason"]
+    visualize_regions_downsampled(classified_patches_folder, modes)
