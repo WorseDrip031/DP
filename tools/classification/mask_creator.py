@@ -61,13 +61,13 @@ def create_masks(wsi_file_path:Path,
 
 
     if not gleason_mask_path.exists():
-        create_mask(gleason_mask_path, "gleason", width, height, classified_patches_folder, patches_folder)
+        create_mask(gleason_mask_path, "gleason", width, height, patches_folder, classified_patches_folder)
     print(f"Mask creation complete for {gleason_mask_path.stem}")
 
     if not normal_mask_path.exists():
-        create_mask(normal_mask_path, "normal", width, height, classified_patches_folder, patches_folder)
+        create_mask(normal_mask_path, "normal", width, height, patches_folder, classified_patches_folder)
     print(f"Mask creation complete for {normal_mask_path.stem}")
 
     if not stroma_mask_path.exists():
-        create_mask(stroma_mask_path, "stroma", width, height, classified_patches_folder, patches_folder)
+        create_mask(stroma_mask_path, "stroma", width, height, patches_folder, classified_patches_folder)
     print(f"Mask creation complete for {stroma_mask_path.stem}")
