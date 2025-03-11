@@ -73,11 +73,12 @@ def visualize_single_mode(mode:str,
 
 
 def visualize_regions_downsampled(classified_patches_folder:Path,
-                                 modes:List[str]):
+                                  modes:List[str]):
     
     print("Visualization analysis started...")
     
     inference_folder = classified_patches_folder.parent.parent
+    patches_folder = inference_folder / "patches"
     output_folder = inference_folder / "visualizations" / classified_patches_folder.stem
     output_folder.mkdir(parents=True, exist_ok=True)
 
@@ -87,7 +88,7 @@ def visualize_regions_downsampled(classified_patches_folder:Path,
         return
 
     # Step 1: Determine all required metadata
-    patches, map_width, map_height, overlap_size = load_patches_and_metadata(inference_folder, classified_patches_folder)
+    patches, map_width, map_height, overlap_size = load_patches_and_metadata(inference_folder, patches_folder)
 
     downsampled_wsi_path = inference_folder / "visualizations" / "downsampled.png"
     downsampled_wsi = Image.open(downsampled_wsi_path)
@@ -103,13 +104,18 @@ def visualize_regions_downsampled(classified_patches_folder:Path,
 
     for y, x, patch_type, _ in tqdm(patches, desc="Processing classified patches"):
         if patch_type != 'n':
+
+            matching_files = list(classified_patches_folder.glob(f"{y}_{x}_*.png"))
+            classified_patch_file = matching_files[0]
+            classified_patch_type = classified_patch_file.stem.split("_")[-1]
+
             m_y = y // overlap_size
             m_x = x // overlap_size
-            if patch_type == "normal":
+            if classified_patch_type == "normal":
                 normal_regions[m_y:m_y+2, m_x:m_x+2] += 1
-            if patch_type == "stroma":
+            if classified_patch_type == "stroma":
                 stroma_regions[m_y:m_y+2, m_x:m_x+2] += 1
-            if patch_type == "gleason":
+            if classified_patch_type == "gleason":
                 gleason_regions[m_y:m_y+2, m_x:m_x+2] += 1
 
     # Step 3: Create visualizations
@@ -139,3 +145,5 @@ def visualize_regions_downsampled(classified_patches_folder:Path,
                               downsampled_overlap_size,
                               downsampled_wsi,
                               output_folder)
+        
+    print("Visualization complete...")

@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
@@ -7,23 +8,29 @@ from pathlib import Path
 from typing import List, Tuple
 
 
-def visualize_regions(folder:Path,
-                      patch_size:int,
-                      overlap_percentage:float
-                      ) -> Image.Image:
+def load_scale_factor(json_file_path:Path) -> float:
+    with open(json_file_path, "r") as f:
+        data = json.load(f)
+    scale_factor = data["scale_factor"]
+    return scale_factor
+
+
+def visualize_regions_to_process(inference_folder:Path,
+                                 patch_size:int,
+                                 overlap_percentage:float):
     
-    print("Processing block visualization analysis started...")
+    print("Regions to process analysis started...")
 
-    if (folder / "regions_to_process.png").exists():
-        wsi_image = Image.open(folder / "regions_to_process.png")
-        print("Processing block visualization complete...")
-        return wsi_image
+    regions_to_process_path = inference_folder / "visualizations" / "regions_to_process.png"
+    if regions_to_process_path.exists():
+        print("Regions to process visualization complete...")
+        return
 
-    # Step 1: Determine WSI Size
+    # Step 1: Determine all required metadata
     max_x, max_y = 0, 0
     patches: List[Tuple[int, int, str, str]] = []
 
-    for filename in os.listdir(folder / "patches"):
+    for filename in os.listdir(inference_folder / "patches"):
         if filename.endswith(".png"):
             parts = filename[:-4].split("_")
             y, x, patch_type = int(parts[0]), int(parts[1]), parts[2]
@@ -36,39 +43,45 @@ def visualize_regions(folder:Path,
     wsi_width = max_x + patch_size
     wsi_height = max_y + patch_size
 
-    red_width = wsi_width // overlap_size
-    red_height = wsi_height // overlap_size
+    map_width = wsi_width // overlap_size
+    map_height = wsi_height // overlap_size
 
-    # Step 2: Reconstruct the WSI with blending
-    wsi_image = Image.new("RGB", (wsi_width, wsi_height), (0, 0, 0))
-    red_regions = np.zeros((red_height, red_width), dtype=np.uint8)
+    downsampled_wsi_path = inference_folder / "visualizations" / "downsampled.png"
+    downsampled_wsi = Image.open(downsampled_wsi_path)
+    scale_factor = load_scale_factor(inference_folder / "visualizations" / "downsampled.json")
+    downsampled_overlap_size = int(overlap_size * scale_factor)
+
+    visual_width, visual_height = downsampled_wsi.size
+
+    # Step 2: Analyse patches
+    regions = np.zeros((map_height, map_width), dtype=np.uint8)
 
     for y, x, patch_type, filename in tqdm(patches, desc="Processing patches"):
-        patch_path = os.path.join((folder / "patches"), filename)
-        patch = Image.open(patch_path).convert("RGB")
-        wsi_image.paste(patch, (x, y))
-
-        # If patch type is 'p', increase red overlay intensity
         if patch_type == 'p':
-            r_y = y // overlap_size
-            r_x = x // overlap_size
-            red_regions[r_y:r_y+2, r_x:r_x+2] += 1
+            m_y = y // overlap_size
+            m_x = x // overlap_size
+            regions[m_y:m_y+2, m_x:m_x+2] += 1
 
-    # Step 3: Create red transparency overlay
-    max_red_value = np.max(red_regions) + 1
-    red_regions = (red_regions / max_red_value * 255).astype(np.uint8)
-    red_mask = Image.new("RGBA", (wsi_width, wsi_height), (0, 0, 0, 0))
+    # Step 3: Create visualizations
+    downsampled_wsi = downsampled_wsi.convert("RGBA")
 
-    for i in tqdm(range(len(red_regions)), desc="Generating red overlay"):
-        for j in range(len(red_regions[i])):
-            if red_regions[i, j] > 0:
-                red_patch = Image.new("RGBA", (overlap_size, overlap_size), (255, 0, 0, red_regions[i][j]))
-                red_mask.paste(red_patch, (j*overlap_size, i*overlap_size), red_patch)
+    max_value = np.max(regions) + 1
+    normalized_regions = (regions / max_value * 255).astype(np.uint8)
 
-    print("Processing block visualization saving...")
+    mask_height = len(normalized_regions)*downsampled_overlap_size
+    mask_width = len(normalized_regions[0])*downsampled_overlap_size
+    
+    mask = Image.new("RGBA", (mask_width, mask_height), (0, 0, 0, 0))
 
-    wsi_image = wsi_image.convert('RGBA')
-    wsi_image = Image.alpha_composite(wsi_image, red_mask)
-    wsi_image.save((folder / "regions_to_process.png"))
+    for i in tqdm(range(len(normalized_regions)), desc="Generating mask"):
+        for j in range(len(normalized_regions[i])):
+            if normalized_regions[i, j] > 0:
+                green_patch = Image.new("RGBA", (downsampled_overlap_size, downsampled_overlap_size), (0, 255, 0, normalized_regions[i][j]))
+                mask.paste(green_patch, (j*downsampled_overlap_size, i*downsampled_overlap_size), green_patch)
 
-    return wsi_image
+    mask = mask.resize((visual_width, visual_height), resample=Image.LANCZOS)
+
+    image = Image.alpha_composite(downsampled_wsi, mask)
+    image.save(regions_to_process_path)
+
+    print("Regions to process visualization complete...")

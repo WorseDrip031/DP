@@ -1,12 +1,11 @@
 import numpy as np
-import json
 import os
 from tqdm import tqdm
 from PIL import Image
 from pathlib import Path
 
 
-def create_and_analyse_patches(wsi:Image.Image,
+def create_and_analyse_patches(wsi_file_path:Path,
                                segmented_wsi:Image.Image,
                                scale_factor:float,
                                patch_size:int,
@@ -17,21 +16,18 @@ def create_and_analyse_patches(wsi:Image.Image,
     print("Patch creation analysis started...")
 
     if any(os.scandir(patch_folder)):
-        print("Patch creation complete...")
+        print(f"Patch creation complete for: {wsi_file_path.stem}")
         return
 
+    # Open WSI
+    Image.MAX_IMAGE_PIXELS = None
+    wsi = Image.open(wsi_file_path)
+
+    # Determine required metadata
     width, height = wsi.size
-    overlap_size = int(patch_size * overlap_percentage)
-
-    data = {
-        "overlap_size": overlap_size
-    }
-    with open(patch_folder / "overlap.json", "w") as f:
-        json.dump(data, f, indent=1)
-
     step = int(patch_size * (1 - overlap_percentage))
 
-    for y in tqdm(range(0, height - patch_size + 1, step), desc="Processing rows", unit="row"):
+    for y in tqdm(range(0, height - patch_size + 1, step), desc=f"Patch creation for: {wsi_file_path.stem}", unit="row"):
         for x in range(0, width - patch_size + 1, step):
 
             # Define the box to crop the patch (left, upper, right, lower)
@@ -57,3 +53,5 @@ def create_and_analyse_patches(wsi:Image.Image,
                 process_patch = "p"
 
             patch.save(patch_folder / f"{y}_{x}_{process_patch}.png")
+
+    wsi.close()

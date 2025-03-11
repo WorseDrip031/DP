@@ -9,6 +9,7 @@ from skimage.util import img_as_ubyte
 from skimage.segmentation import felzenszwalb
 from skimage.io import imsave, imread
 
+
 def segment_tissue(dowsnampled_wsi:Image.Image,
                    segmented_wsi_path:Path
                    ) -> Image.Image:

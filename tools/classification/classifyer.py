@@ -1,6 +1,5 @@
 import cv2
 import os
-import shutil
 from tqdm import tqdm
 import torchvision.transforms as TF
 from typing import Callable
@@ -25,7 +24,7 @@ def classify_patches(model:nn.Module,
                      new_folder:Path):
 
     if any(os.scandir(new_folder)):
-        print("Patch analysis complete...")
+        print("Patch classification analysis complete...")
         return
 
     if isinstance(model, ResNet18Model):
@@ -48,10 +47,8 @@ def classify_patches(model:nn.Module,
     model.eval()
 
     patch_list = list(original_folder.glob("*.png"))
-    for patch_path in tqdm(patch_list, desc="Processing patches", unit="file"):
-        if patch_path.stem.endswith("n"):
-            shutil.copy(patch_path, new_folder)
-        else:
+    for patch_path in tqdm(patch_list, desc="Classifying patches", unit="file"):
+        if not patch_path.stem.endswith("n"):
             patch = cv2.imread(patch_path, cv2.IMREAD_COLOR)
             patch = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
             patch = image_transform(patch)

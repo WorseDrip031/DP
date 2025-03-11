@@ -173,51 +173,30 @@ def pre_process_subset(original_folder, target_folder):
         print(f"\nOpening {file.stem}.tiff\n")
         img = Image.open(file)
 
-        # Create a downsized version and save it
-        img_copy = img.copy()
-        size = 2048, 2048
-        img_copy.thumbnail(size)
-        img_copy.save(sub_folder / "00000_image.png")
-
         g3_img, g4_img, g5_img, normal_img, stroma_img = None, None, None, None, None
 
         try:
             g3_img = Image.open(g3_file)
-            img_copy = g3_img.copy()
-            img_copy.thumbnail(size)
-            img_copy.save(sub_folder / "00000_g3.png")
         except:
             print(f"There is no G3 Mask for {file.stem}\n")
 
         try:
             g4_img = Image.open(g4_file)
-            img_copy = g4_img.copy()
-            img_copy.thumbnail(size)
-            img_copy.save(sub_folder / "00000_g4.png")
         except:
             print(f"There is no G4 Mask for {file.stem}\n")
 
         try:
             g5_img = Image.open(g5_file)
-            img_copy = g5_img.copy()
-            img_copy.thumbnail(size)
-            img_copy.save(sub_folder / "00000_g5.png")
         except:
             print(f"There is no G5 Mask for {file.stem}\n")
 
         try:
             normal_img = Image.open(normal_file)
-            img_copy = normal_img.copy()
-            img_copy.thumbnail(size)
-            img_copy.save(sub_folder / "00000_normal.png")
         except:
             print(f"There is no Normal Mask for {file.stem}\n")
 
         try:
             stroma_img = Image.open(stroma_file)
-            img_copy = stroma_img.copy()
-            img_copy.thumbnail(size)
-            img_copy.save(sub_folder / "00000_stroma.png")
         except:
             print(f"There is no Stroma Mask for {file.stem}\n")
 
@@ -313,7 +292,7 @@ def pre_process_dataset(dataset_folder):
 def create_aggc_dataset(type="train", **kwargs):
 
     # Pre-process dataset if neccessary
-    dataset_folder = DATASET_BASEPATH / "AGGC-2022"
+    dataset_folder = DATASET_BASEPATH / "AGGC-2022-Patches"
     check_file = dataset_folder / ".done"
     if not check_file.exists():
         pre_process_dataset(dataset_folder)
@@ -582,7 +561,7 @@ def pre_process_classification_subset(original_folder, target_folder):
 
 def pre_process_classification_dataset(dataset_folder):
     dataset_folder.mkdir(parents=True, exist_ok=True)
-    original_folder = DATASET_BASEPATH / "AGGC-2022"
+    original_folder = DATASET_BASEPATH / "AGGC-2022-Patches"
 
     check_file = dataset_folder / "train" / ".done"
     if not check_file.exists():
@@ -608,7 +587,7 @@ def pre_process_classification_dataset(dataset_folder):
 def create_aggc_classification_dataset(cfg, type="train", **kwargs):
 
     # Pre-process dataset if neccessary
-    dataset_folder = DATASET_BASEPATH / "AGGC-2022"
+    dataset_folder = DATASET_BASEPATH / "AGGC-2022-Patches"
     check_file = dataset_folder / ".done"
     if not check_file.exists():
         pre_process_dataset(dataset_folder)
