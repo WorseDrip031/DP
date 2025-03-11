@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 from PIL import Image
+from tqdm import tqdm
 import tifffile
 
 
@@ -19,7 +20,8 @@ def create_mask(mask_path:Path,
     # Create mask
     mask = np.zeros((height, width), dtype=np.uint8)
 
-    for patch_file in patches_folder.glob("*.png"):
+    patch_files = list(patches_folder.glob("*.png"))
+    for patch_file in tqdm(patch_files, desc=f"Creating {mask_type} mask"):
         parts = patch_file.stem.split('_')
         y, x, patch_type = int(parts[0]), int(parts[1]), parts[2]
 
