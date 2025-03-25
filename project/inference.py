@@ -13,7 +13,7 @@ print("#  Stage 1: Pre-processing - Patching  #")
 print("########################################")
 print()
 
-wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_025.tiff"     # Path to the WSI to be analysed
+wsi_file_path = DATASET_BASEPATH / "test" / "Subset1_Test_005.tiff"     # Path to the WSI to be analysed
 patch_size = 512                                                        # Size of the created patches
 overlap_percentage = 0.5                                                # Percentage of overlap between patches
 tissue_coverage = 0.5                                                   # Minimal tissue coverage of patch for processing
@@ -26,8 +26,8 @@ print("#  Stage 2: Patch Classification  #")
 print("###################################")
 print()
 
-model_name = "0001 - Pretrained ResNet18 Grouped"
+model_name = "0007 - EVA02 Grouped Pretrained Frozne Downscale"
 model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
-model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0002.pt"
+model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0005.pt"
 
 analyse_patches(wsi_file_path, inference_folder, model_name, model_config_path, model_checkpoint_path)

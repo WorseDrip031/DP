@@ -37,7 +37,7 @@ def create_mask(mask_path:Path,
         if classified_type == mask_type:
             mask[y:y+patch_size, x:x+patch_size] = 255  # Binary mask set to 255
     
-    tifffile.imwrite(mask_path, mask)
+    tifffile.imwrite(mask_path, mask, compression="lzw")
 
 
 def create_masks(wsi_file_path:Path,

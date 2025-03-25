@@ -18,6 +18,8 @@ overlap_percentage = 0.5                                                # Percen
 tissue_coverage = 0.5                                                   # Minimal tissue coverage of patch for processing
 
 wsi_file_paths = [
+    DATASET_BASEPATH / "test" / "Subset1_Test_001.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_002.tiff",
     DATASET_BASEPATH / "test" / "Subset1_Test_005.tiff",
     DATASET_BASEPATH / "test" / "Subset1_Test_015.tiff",
     DATASET_BASEPATH / "test" / "Subset1_Test_025.tiff",
@@ -70,9 +72,11 @@ for wsi_path in wsi_file_paths:
 
     inference_folder = preprocess_patches(INFERENCE_BASEPATH, wsi_path, patch_size, overlap_percentage, tissue_coverage)
 
+    print()
     print("###################################")
     print("#  Stage 2: Patch Classification  #")
     print("###################################")
+    print()
 
     for m_paths in model_paths:
         analyse_patches(wsi_path, inference_folder, m_paths[0], m_paths[1], m_paths[2])
