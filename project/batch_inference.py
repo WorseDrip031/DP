@@ -18,21 +18,51 @@ overlap_percentage = 0.5                                                # Percen
 tissue_coverage = 0.5                                                   # Minimal tissue coverage of patch for processing
 
 wsi_file_paths = [
-    DATASET_BASEPATH / "test" / "Subset1_Test_001.tiff",
-    DATASET_BASEPATH / "test" / "Subset1_Test_002.tiff",
-    DATASET_BASEPATH / "test" / "Subset1_Test_005.tiff",
-    DATASET_BASEPATH / "test" / "Subset1_Test_015.tiff",
-    DATASET_BASEPATH / "test" / "Subset1_Test_025.tiff",
-    DATASET_BASEPATH / "test" / "Subset1_Test_035.tiff",
-    DATASET_BASEPATH / "test" / "Subset1_Test_045.tiff",
-    DATASET_BASEPATH / "train" / "Subset1_Train_001.tiff",
-    DATASET_BASEPATH / "train" / "Subset1_Train_002.tiff",
-    DATASET_BASEPATH / "train" / "Subset1_Train_071.tiff",
-    DATASET_BASEPATH / "train" / "Subset1_Train_075.tiff",
-    DATASET_BASEPATH / "val" / "Subset1_Val_002.tiff",
-    DATASET_BASEPATH / "val" / "Subset1_Val_008.tiff",
-    DATASET_BASEPATH / "val" / "Subset1_Val_012.tiff",
-    DATASET_BASEPATH / "val" / "Subset1_Val_018.tiff"
+    #DATASET_BASEPATH / "test" / "Subset1_Test_001.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_002.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_003.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_004.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_005.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_006.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_007.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_008.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_009.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_010.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_011.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_012.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_013.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_014.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_015.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_016.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_017.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_018.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_019.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_020.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_021.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_022.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_023.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_024.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_025.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_026.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_027.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_028.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_029.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_030.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_031.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_032.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_033.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_034.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_035.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_036.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_037.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_038.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_039.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_040.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_041.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_042.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_043.tiff",
+    DATASET_BASEPATH / "test" / "Subset1_Test_044.tiff",
+    #DATASET_BASEPATH / "test" / "Subset1_Test_045.tiff",
 ]
 
 
@@ -41,11 +71,6 @@ wsi_file_paths = [
 ##############################
 
 model_paths:List[Tuple[str, Path, Path]] = []
-
-model_name = "0001 - Pretrained ResNet18 Grouped"
-model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
-model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0002.pt"
-model_paths.append((model_name, model_config_path, model_checkpoint_path))
 
 model_name = "0005 - Pretrained Frozen ViT Grouped Downscale"
 model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
