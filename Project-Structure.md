@@ -43,6 +43,12 @@
 |           ├── classified_patches
 |           |   └── 0001 - Pretrained ResNet18 Grouped
 |           |       └── 40448_5120_normal.png            # <y-in-original-WSI>_<x-in-original-WSI>_<patch-type>.png   patch-types: gleason, normal, stroma
+|           ├── finetuned_masks
+|           |   └── 0001 - Pretrained ResNet18 Grouped
+|           |       ├── Annotation.geojson               # Output finetuned masks for all 3 classes in geojson format
+|           |       ├── Gleason_Mask.tif                 # Output finetuned mask for the Gleason class (G3&G4&G5) with size of the original WSI
+|           |       ├── Normal_Mask.tif                  # Output finetuned mask for the Normal class with size of the original WSI
+|           |       └── Stroma_Mask.tif                  # Output finetuned mask for the Stroma class with size of the original WSI
 |           ├── masks
 |           |   └── 0001 - Pretrained ResNet18 Grouped
 |           |       ├── Gleason_Mask.tif                 # Output mask for the Gleason class (G3&G4&G5) with size of the original WSI
@@ -50,23 +56,24 @@
 |           |       └── Stroma_Mask.tif                  # Output mask for the Stroma class with size of the original WSI
 |           ├── patches
 |           |   └── 0_0_n.png                            # <y-in-original-WSI>_<x-in-original-WSI>_<patch-type>.png   patch-types: n-NoTissue, p-ProcessFurther
-|           └── visualizations
-|               ├── 0001 - Pretrained ResNet18 Grouped
-|               |   ├── gleason.png                      # Gleason class predictions overlayed over downsampled WSI
-|               |   ├── gleason_with_gt.png              # Gleason class predictions overlayed over downsampled WSI with Fround Truth highlighted
-|               |   ├── normal.png                       # Normal class predictions overlayed over downsampled WSI
-|               |   ├── normal_with_gt.png               # Normal class predictions overlayed over downsampled WSI with Fround Truth highlighted
-|               |   ├── stroma.png                       # Stroma class predictions overlayed over downsampled WSI
-|               |   └── stroma_with_gt.png               # Stroma class predictions overlayed over downsampled WSI with Fround Truth highlighted
-|               ├── downsampled.json                     # Holds the downsample scale-factor
-|               ├── downsampled.png                      # Downsampled WSI
-|               ├── downsampled_G3_Mask.png              # [Optional] Downsampled G3Mask
-|               ├── downsampled_G4_Mask.png              # [Optional] Downsampled G4Mask
-|               ├── downsampled_G5_Mask.png              # [Optional] Downsampled G4Mask
-|               ├── downsampled_Normal_Mask.png          # [Optional] Downsampled NormalMask
-|               ├── downsampled_Stroma_Mask.png          # [Optional] Downsampled StromaMask
-|               ├── regions_to_process.png               # Downsampled WSI overlayed with regions selected for further processing
-|               └── segmented.png                        # Downsampled binary mask for tissue segmentation
+|           ├── visualizations
+|           |   ├── 0001 - Pretrained ResNet18 Grouped
+|           |   |   ├── gleason.png                      # Gleason class predictions overlayed over downsampled WSI
+|           |   |   ├── gleason_with_gt.png              # Gleason class predictions overlayed over downsampled WSI with Fround Truth highlighted
+|           |   |   ├── normal.png                       # Normal class predictions overlayed over downsampled WSI
+|           |   |   ├── normal_with_gt.png               # Normal class predictions overlayed over downsampled WSI with Fround Truth highlighted
+|           |   |   ├── stroma.png                       # Stroma class predictions overlayed over downsampled WSI
+|           |   |   └── stroma_with_gt.png               # Stroma class predictions overlayed over downsampled WSI with Fround Truth highlighted
+|           |   ├── downsampled.json                     # Holds the downsample scale-factor
+|           |   ├── downsampled.png                      # Downsampled WSI
+|           |   ├── downsampled_G3_Mask.png              # [Optional] Downsampled G3Mask
+|           |   ├── downsampled_G4_Mask.png              # [Optional] Downsampled G4Mask
+|           |   ├── downsampled_G5_Mask.png              # [Optional] Downsampled G4Mask
+|           |   ├── downsampled_Normal_Mask.png          # [Optional] Downsampled NormalMask
+|           |   ├── downsampled_Stroma_Mask.png          # [Optional] Downsampled StromaMask
+|           |   ├── regions_to_process.png               # Downsampled WSI overlayed with regions selected for further processing
+|           |   └── segmented.png                        # Downsampled binary mask for tissue segmentation
+|           └── Subset1_Val_001_pyramidal.tiff           # The original WSI converted into a pyramidal representation for the QuPath program
 ├── project
 │   ├── classification_training.py   # Script to run Classification Training
 │   ├── batch_inference.py           # Script to perform inference over multiple WSIs and multiple models
@@ -74,4 +81,5 @@
 └── tools
     ├── classification               # Source code for Phase2: Classification
     ├── patching                     # Source code for Phase1: Patching
+    ├── postprocessing               # Source code for Phase3: Postprocessing
     └── training                     # Source code for Classification Training

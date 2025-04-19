@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 from tools.patching import preprocess_patches
 from tools.classification import analyse_patches
+from tools.postprocessing import postprocess_predictions
 
 DATASET_BASEPATH = Path(".scratch/data/AGGC-2022-Unprepared")
 MODELS_BASEPATH = Path(".scratch/experiments")
@@ -103,5 +104,19 @@ for wsi_path in wsi_file_paths:
     print("###################################")
     print()
 
+    masks_folders:List[Path] = []
+
     for m_paths in model_paths:
-        analyse_patches(wsi_path, inference_folder, m_paths[0], m_paths[1], m_paths[2])
+
+        masks_folder = analyse_patches(wsi_path, inference_folder, m_paths[0], m_paths[1], m_paths[2])
+        masks_folders.append(masks_folder)
+
+    print()
+    print("##########################")
+    print("#  Stage 3: Fine Tuning  #")
+    print("##########################")
+    print()
+
+    for mask_folder in masks_folders:
+
+        postprocess_predictions(wsi_path, inference_folder, mask_folder)

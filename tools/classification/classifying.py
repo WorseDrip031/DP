@@ -10,7 +10,8 @@ def analyse_patches(wsi_file_path:Path,
                     inference_folder:Path,
                     model_name:str,
                     model_config_path:Path,
-                    model_checkpoint_path:Path):
+                    model_checkpoint_path:Path
+                    ) -> Path:
     
     # Step 1: Load model into memory
     print(f"Model loading started for: {model_name}")
@@ -35,3 +36,5 @@ def analyse_patches(wsi_file_path:Path,
     masks_folder = inference_folder / "masks" / model_name
     masks_folder.mkdir(parents=True, exist_ok=True)
     create_masks(wsi_file_path, patches_folder, classified_patches_folder, masks_folder)
+
+    return masks_folder

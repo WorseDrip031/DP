@@ -2,6 +2,7 @@ from pathlib import Path
 
 from tools.patching import preprocess_patches
 from tools.classification import analyse_patches
+from tools.postprocessing import postprocess_predictions
 
 DATASET_BASEPATH = Path(".scratch/data/AGGC-2022-Unprepared")
 MODELS_BASEPATH = Path(".scratch/experiments")
@@ -30,4 +31,12 @@ model_name = "0007 - EVA02 Grouped Pretrained Frozne Downscale"
 model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
 model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0005.pt"
 
-analyse_patches(wsi_file_path, inference_folder, model_name, model_config_path, model_checkpoint_path)
+masks_folder = analyse_patches(wsi_file_path, inference_folder, model_name, model_config_path, model_checkpoint_path)
+
+print()
+print("##########################")
+print("#  Stage 3: Fine Tuning  #")
+print("##########################")
+print()
+
+postprocess_predictions(wsi_file_path, inference_folder, masks_folder)
