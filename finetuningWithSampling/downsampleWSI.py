@@ -19,7 +19,6 @@ def downsample(image_path:Path,
     new_size = (int(width * scale_factor), int(height * scale_factor))
 
     # Downsample
-    print(f"Dowsnampling started for: {image_path.stem}")
     downsampled_image = image.resize(new_size, Image.LANCZOS)
     downsampled_image.save(output_path)
     downsampled_image.close()

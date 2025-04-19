@@ -10,10 +10,10 @@ mask_path = Path(".scratch") / "inference" / "Subset1_Test_001-512-0.5-0.5" / "m
 
 downsample_size = 20000
 downsampled_wsi_path = Path("finetuningWithSampling") / "output" / f"{wsi_path.stem}_{downsample_size}.tiff"
-downsampled_mask_path = Path("finetuningWithSampling") / "output" / f"{wsi_path.stem}_{downsample_size}.tiff"
+downsampled_mask_path = Path("finetuningWithSampling") / "output" / f"{mask_path.stem}_{downsample_size}.tiff"
 
-downsampled_finetuned_mask_path = Path("finetuningWithSampling") / "output" / f"{wsi_path.stem}_{downsample_size}_df.tiff"
-finetuned_mask_path = Path("finetuningWithSampling") / "output" / f"{wsi_path.stem}_{downsample_size}_f.tiff"
+downsampled_finetuned_mask_path = Path("finetuningWithSampling") / "output" / f"{mask_path.stem}_{downsample_size}_df.tiff"
+finetuned_mask_path = Path("finetuningWithSampling") / "output" / f"{mask_path.stem}_{downsample_size}_f.tiff"
 
 # Step 1: Downsample WSI
 print("WSI downsampling started...")
