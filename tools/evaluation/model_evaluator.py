@@ -29,7 +29,12 @@ def evaluate_model(model:nn.Module,
 
     with torch.no_grad():
         with tqdm(datamodule.dataloader_test, desc="Testing the trained model") as progress:
+
+            print("Hello")
+
             for x, y in progress:
+
+
 
                 x = x.to(device)
                 y = y.to(device)

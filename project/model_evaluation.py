@@ -10,6 +10,10 @@ model_name = "0007 - EVA02 Grouped Pretrained Frozne Downscale"
 model_config_path = MODELS_BASEPATH / model_name / "config.yaml"
 model_checkpoint_path = MODELS_BASEPATH / model_name / "checkpoints" / "checkpoint-0005.pt"
 
-model = load_model(model_config_path, model_checkpoint_path)
+# model = load_model(model_config_path, model_checkpoint_path)
 datamodule = prepare_datamodule(model_config_path)
-evaluate_model(model, datamodule)
+
+x, y = iter(datamodule.dataloader_test)
+a = 5
+
+# evaluate_model(model, datamodule)

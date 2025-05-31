@@ -1,11 +1,12 @@
 import yaml
 from pathlib import Path
+from argparse import Namespace
 
 from tools.training import AGGC2022ClassificationDatamodule
 
 
 def load_config(config_path:Path
-                ) -> dict[str, str | int]:
+                ) -> Namespace:
 
     with open(config_path, 'r') as file:
         config = yaml.safe_load(file)
@@ -19,19 +20,19 @@ def load_config(config_path:Path
         vit_technique = config.get("vit_technique", "N/A")
 
         # Create a dictionary with the retrieved variables
-        hyperparameters = {
-            "model_architecture": model_architecture,
-            "use_augmentations": use_augmentations,
-            "batch_size": batch_size,
-            "num_workers": num_workers,
-            "gleason_handling": gleason_handling,
-            "vit_technique": vit_technique,
-        }
+        hyperparameters = Namespace()
+        hyperparameters.model_architecture = model_architecture
+        hyperparameters.use_augmentations = use_augmentations
+        hyperparameters.batch_size = batch_size
+        hyperparameters.num_workers = num_workers
+        hyperparameters.gleason_handling = gleason_handling
+        hyperparameters.vit_technique = vit_technique
 
         return hyperparameters
 
 
 def prepare_datamodule(config_path:Path) -> AGGC2022ClassificationDatamodule:
     config = load_config(config_path)
+    a = 5
     datamodule = AGGC2022ClassificationDatamodule(config)
     return datamodule
